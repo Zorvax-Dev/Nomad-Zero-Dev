@@ -527,10 +527,6 @@ func _setup_input_actions() -> void:
 		"move_right": [KEY_D, KEY_RIGHT],
 		"move_up": [KEY_W, KEY_Z, KEY_UP],
 		"move_down": [KEY_S, KEY_DOWN],
-		"special": [KEY_SPACE],
-		"dash": [KEY_SHIFT],
-		"traction": [KEY_E],
-		"surge": [KEY_R],
 		"pause": [KEY_ESCAPE]
 	}
 	for action_name: String in actions.keys():
@@ -1680,13 +1676,13 @@ func _make_upgrade_option(upgrade_id: String, rarity: String) -> Dictionary:
 			description = "+%.1f %% chance de fragment" % (1.4 * multiplier)
 		"repair":
 			title = "SOINS DE CAMPAGNE"
-			description = "Récupère jusqu'à 50 PV"
+			description = "Récupération immédiate de PV"
 		"salvage":
 			title = "RÉCUPÉRATION"
-			description = "+4 fragments pour le profil"
+			description = "+3 fragments pour le profil"
 		"charge":
 			title = "RÉARMEMENT"
-			description = "Recharge l'onde et le dash"
+			description = "Recharge immédiatement l'onde de Force"
 	return {"id": upgrade_id, "rarity": rarity, "multiplier": multiplier, "title": title, "description": description}
 
 func _generate_upgrade_options() -> Array[Dictionary]:
@@ -1844,7 +1840,6 @@ func _apply_level_upgrade(option: Dictionary) -> void:
 			run_fragments += 3
 		"charge":
 			player.pulse_timer = 0.0
-			player.dash_timer = 0.0
 	player.heal(minf(16.0, player.max_health * 0.025))
 	player.restore_shield(8.0)
 	_check_run_synergies()
