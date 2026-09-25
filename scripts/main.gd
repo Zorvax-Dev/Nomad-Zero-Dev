@@ -2420,19 +2420,6 @@ func _spawn_player() -> void:
 	world_camera.enabled = true
 	player.add_child(world_camera)
 
-func _nearest_enemy_to(origin: Vector2, max_distance: float) -> NomadEnemy:
-	var best: NomadEnemy = null
-	var best_distance: float = max_distance * max_distance
-	for node: Node in enemies_root.get_children():
-		var enemy: NomadEnemy = node as NomadEnemy
-		if enemy == null or not enemy.active:
-			continue
-		var distance: float = origin.distance_squared_to(enemy.global_position)
-		if distance < best_distance:
-			best_distance = distance
-			best = enemy
-	return best
-
 func _update_game(delta: float) -> void:
 	if not is_instance_valid(player):
 		return
@@ -2670,25 +2657,6 @@ func _player_zone() -> String:
 	if not is_instance_valid(player):
 		return ""
 	return world.zone_name(player.global_position)
-
-func _zone_center(zone: String) -> Vector2:
-	match zone:
-		"CAMP NOMADE":
-			return Vector2(500.0, 520.0)
-		"RAFFINERIE":
-			return Vector2(2520.0, 520.0)
-		"ÉPAVE DU PÈLERIN":
-			return Vector2(1600.0, 1475.0)
-		"AVANT-POSTE":
-			return Vector2(2460.0, 1480.0)
-		"PLAINE CENTRALE":
-			return Vector2(1536.0, 1024.0)
-		"CANYON DES ÉCHOS":
-			return Vector2(3600.0, 1050.0)
-		"CIMETIÈRE D’ÉPAVES":
-			return Vector2(2050.0, 2570.0)
-		_:
-			return StylizedWorld.PLAYER_START
 
 func _zone_color(zone: String) -> Color:
 	match zone:
@@ -4253,42 +4221,6 @@ func _cancel_dynamic_world_event(message: String) -> void:
 	_refresh_dynamic_event_marker()
 	_show_toast(message)
 	_save_profile()
-
-func _trigger_rift_surge() -> void:
-	if state != State.PLAYING or not is_instance_valid(player) or wave_cleanup:
-		return
-	var event_roll: int = rng.randi_range(0, 3)
-	if event_roll == 0:
-		_show_toast("SURSAUT DU RIFT  •  CONTACTS EN APPROCHE")
-		_flash_rift_overlay()
-		_spawn_pulse_fx(Color(0.72, 0.38, 1.0, 0.62), 2.8, 0.55)
-		var count: int = mini(7, 4 + floori(float(level) / 4.0))
-		for i: int in range(count):
-			var force_elite: bool = i == 0 and level >= 4
-			_spawn_enemy("", force_elite)
-	elif event_roll == 1:
-		_show_toast("CHASSEURS DU VIDE  •  UNITÉS D'ÉLITE")
-		_flash_rift_overlay(Color(0.78, 0.24, 0.60, 0.20))
-		_spawn_pulse_fx(Color(0.92, 0.34, 0.72, 0.62), 2.4, 0.48)
-		var elite_count: int = 2 + mini(2, floori(float(level) / 8.0))
-		for _i: int in range(elite_count):
-			_spawn_enemy("", true)
-	elif event_roll == 2:
-		_show_toast("CARGO DU RIFT  •  RAVITAILLEMENT CONTESTÉ")
-		_flash_rift_overlay(Color(0.22, 0.66, 0.82, 0.14))
-		_spawn_supply(player.global_position + Vector2(-70.0, -20.0), "med")
-		_spawn_supply(player.global_position + Vector2(70.0, -20.0), "charge")
-		_spawn_supply(player.global_position + Vector2(0.0, 64.0), "charge")
-		for _i: int in range(3 + mini(3, floori(float(level) / 6.0))):
-			_spawn_enemy("", false)
-	else:
-		_show_toast("ANOMALIE DU RIFT  •  FRAGMENT INSTABLE")
-		_flash_rift_overlay(Color(0.96, 0.54, 0.18, 0.18))
-		_spawn_rift_fragment(player.global_position + Vector2(rng.randf_range(-90.0, 90.0), rng.randf_range(-70.0, 70.0)), 1)
-		_spawn_enemy("heavy", level >= 5)
-		for _i: int in range(2 + mini(3, floori(float(level) / 7.0))):
-			_spawn_enemy("", _i == 0 and level >= 7)
-	_shake(4.0, 0.16)
 
 func _boss_name(boss_kind: String) -> String:
 	match boss_kind:
