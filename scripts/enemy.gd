@@ -434,11 +434,16 @@ func _physics_process(delta: float) -> void:
 		return
 	match kind:
 		"raider":
-			if dist > 50.0:
-				_move_dir(to_target.normalized(), delta)
+			if dist > 150.0:
+				_move_dir((to_target.normalized() + to_target.normalized().orthogonal() * strafe_sign * 0.18).normalized(), delta)
+				moving = true
+			elif dist > 62.0 and role_action_timer <= 0.0:
+				_start_role_windup("raider_hook", 0.24 / minf(1.12, attack_speed_multiplier), to_target)
+			elif dist > 46.0:
+				_move_dir(to_target.normalized().rotated(0.16 * strafe_sign), delta)
 				moving = true
 			elif attack_timer <= 0.0:
-				attack_timer = 0.76 / attack_speed_multiplier
+				attack_timer = 0.72 / attack_speed_multiplier
 				target.take_damage(damage)
 		"stalker":
 			if dist > 150.0:
@@ -484,12 +489,17 @@ func _physics_process(delta: float) -> void:
 				attack_timer = 1.34 / attack_speed_multiplier
 				target.take_damage(damage)
 		"heavy":
-			if dist > 72.0:
+			if dist > 118.0:
 				_move_dir(to_target.normalized(), delta)
 				moving = true
+			elif dist <= 108.0 and role_action_timer <= 0.0:
+				_start_role_windup("heavy_slam", 0.72 / minf(1.10, attack_speed_multiplier), to_target)
+			elif dist > 70.0:
+				_move_dir(to_target.normalized(), delta * 0.55)
+				moving = true
 			elif attack_timer <= 0.0:
-				attack_timer = 1.18 / attack_speed_multiplier
-				target.take_damage(damage)
+				attack_timer = 1.26 / attack_speed_multiplier
+				target.take_damage(damage * 0.84)
 		"echo_scout":
 			if dist > 185.0:
 				_move_dir((to_target.normalized() + to_target.normalized().orthogonal() * strafe_sign * 0.28).normalized(), delta)
@@ -562,6 +572,19 @@ func _physics_process(delta: float) -> void:
 			elif dist <= 76.0 and attack_timer <= 0.0:
 				attack_timer = 1.42
 				target.take_damage(damage * 0.74)
+		"blaster":
+			var preferred_range: float = ranged_attack_range
+			if dist > preferred_range + 34.0:
+				_move_dir((to_target.normalized() + to_target.normalized().orthogonal() * strafe_sign * 0.16).normalized(), delta)
+				moving = true
+			elif dist < preferred_range - 120.0:
+				_move_dir((-to_target.normalized() + to_target.normalized().orthogonal() * strafe_sign * 0.30).normalized(), delta)
+				moving = true
+			elif attack_timer <= 0.0 and role_action_timer <= 0.0:
+				_start_role_windup("blaster_double", 0.30 / minf(1.14, attack_speed_multiplier), to_target)
+			else:
+				_move_dir(to_target.normalized().orthogonal() * strafe_sign, delta * 0.22)
+				moving = true
 		"phantom":
 			if dist > ranged_attack_range + 30.0:
 				_move_dir(to_target.normalized(), delta)
@@ -677,6 +700,28 @@ func _finish_role_action() -> void:
 		return
 	var pattern: String = role_windup_pattern
 	match pattern:
+		"raider_hook":
+			var hook_start: Vector2 = global_position
+			var side_dir: Vector2 = role_locked_direction.orthogonal() * strafe_sign
+			var hook_dir: Vector2 = (role_locked_direction * 0.82 + side_dir * 0.42).normalized()
+			var hook_distance: float = minf(108.0, maxf(54.0, hook_start.distance_to(role_locked_position) - 34.0))
+			var hook_target: Vector2 = hook_start + hook_dir * hook_distance
+			global_position = world_nav.resolve_motion(hook_start, hook_target, 20.0) if world_nav != null else hook_target
+			strafe_sign *= -1.0
+			role_action_timer = 1.55
+			var closest_hook: Vector2 = Geometry2D.get_closest_point_to_segment(target.global_position, hook_start, global_position)
+			if closest_hook.distance_to(target.global_position) <= 46.0:
+				target.take_damage(damage * 0.70)
+		"heavy_slam":
+			role_action_timer = 2.80
+			attack_timer = 0.95 / attack_speed_multiplier
+			if target.global_position.distance_to(global_position) <= 104.0:
+				target.take_damage(damage * 0.92)
+		"blaster_double":
+			request_shot.emit(self, target)
+			attack_timer = 1.36 / attack_speed_multiplier
+			role_action_timer = 0.78
+			strafe_sign *= -1.0
 		"stalker_lunge":
 			var lunge_start: Vector2 = global_position
 			var locked_dist: float = lunge_start.distance_to(role_locked_position)
@@ -795,6 +840,9 @@ func telegraph_label() -> String:
 	if windup_left > 0.0:
 		return "BOSS"
 	match role_windup_pattern:
+		"raider_hook": return "RAIDER"
+		"heavy_slam": return "LOURD"
+		"blaster_double": return "BLASTER"
 		"sniper_lock": return "SNIPER"
 		"suppressor_burst": return "SUPPRESSEUR"
 		"breaker_charge": return "BRISEUR"
@@ -1430,6 +1478,23 @@ func _draw() -> void:
 func _draw_role_warning() -> void:
 	var progress: float = 1.0 - role_windup_left / maxf(0.01, role_windup_duration)
 	match role_windup_pattern:
+		"raider_hook":
+			var hook_side: Vector2 = role_locked_direction.orthogonal() * strafe_sign * 34.0
+			var hook_finish: Vector2 = role_locked_direction * 112.0 + hook_side
+			draw_line(Vector2.ZERO, hook_finish, Color(1.0, 0.58, 0.28, 0.13 + progress * 0.13), 24.0, true)
+			draw_line(Vector2.ZERO, hook_finish * progress, Color(1.0, 0.82, 0.54, 0.92), 3.0, true)
+			draw_arc(Vector2.ZERO, 40.0, -PI * 0.5, -PI * 0.5 + TAU * progress, 28, Color(1.0, 0.68, 0.36), 4.0, true)
+		"heavy_slam":
+			draw_circle(Vector2.ZERO, 104.0, Color(1.0, 0.38, 0.16, 0.08 + progress * 0.12))
+			draw_arc(Vector2.ZERO, 104.0, 0.0, TAU, 46, Color(1.0, 0.58, 0.28, 0.82), 3.5, true)
+			draw_arc(Vector2.ZERO, 94.0, -PI * 0.5, -PI * 0.5 + TAU * progress, 40, Color.WHITE, 4.0, true)
+		"blaster_double":
+			var blaster_end: Vector2 = role_locked_direction * 360.0
+			var spread_side: Vector2 = role_locked_direction.orthogonal() * 12.0
+			for offset: Vector2 in [-spread_side, spread_side]:
+				draw_line(offset, blaster_end + offset, Color(0.98, 0.72, 0.34, 0.10 + progress * 0.12), 10.0, true)
+				draw_line(offset, (blaster_end + offset) * progress, Color(1.0, 0.88, 0.58, 0.90), 2.2, true)
+			draw_arc(Vector2.ZERO, 42.0, -PI * 0.5, -PI * 0.5 + TAU * progress, 28, Color(1.0, 0.76, 0.38), 3.5, true)
 		"sniper_lock":
 			var end_point: Vector2 = role_locked_direction * 560.0
 			draw_line(Vector2.ZERO, end_point, Color(0.18, 0.78, 1.0, 0.13 + progress * 0.15), 18.0, true)
