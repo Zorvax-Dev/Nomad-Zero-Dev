@@ -2330,7 +2330,6 @@ func _spawn_player() -> void:
 	player.global_position = StylizedWorld.PLAYER_START
 	player.died.connect(_on_player_died)
 	player.damaged.connect(_on_player_damaged)
-	player.dodged.connect(_on_player_dodged)
 	world_entities.add_child(player)
 	world_camera = Camera2D.new()
 	world_camera.position_smoothing_enabled = true
@@ -3337,13 +3336,6 @@ func _on_player_damaged(world_position: Vector2, amount: float) -> void:
 	_play_sfx(SFX_HURT, -14.5 if heavy_hit else -16.0, 0.97, 1.01)
 	_shake(6.4 if heavy_hit else 5.0, 0.17 if heavy_hit else 0.14)
 	_haptic(42 if heavy_hit else 30, 0.58 if heavy_hit else 0.48, 0.11)
-
-func _on_player_dodged(world_position: Vector2, amount: float) -> void:
-	# A dash that actually crosses a hostile hit gets explicit feedback.
-	_spawn_combat_text(world_position + Vector2(0.0, -62.0), "ESQUIVE", Color("a9f6ff"), 18)
-	_spawn_combat_sparks(world_position, Color("88efff"), 3, 0.82)
-	if is_instance_valid(player) and amount >= player.max_health * 0.10:
-		_haptic(12, 0.24, 0.08)
 
 func _grant_boss_reward(boss_kind: String) -> String:
 	var reward: String = ""
