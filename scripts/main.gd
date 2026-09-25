@@ -61,8 +61,8 @@ const LEGACY_SAVE_PATH: String = "user://rift_nomad_stylized.cfg"
 const SAVE_VERSION: int = 9
 const RUN_SAVE_VERSION: int = 1
 const AUTOSAVE_INTERVAL: float = 12.0
-const APP_VERSION: String = "49.3.0"
-const BUILD_NAME: String = "V49.3 • IDENTITÉS DE COMBAT"
+const APP_VERSION: String = "49.4.0"
+const BUILD_NAME: String = "V49.4 • COHÉRENCE & STABILITÉ"
 const BOSS_CUTOUT: Shader = preload("res://assets/bosses/boss_cutout.gdshader")
 const BOSS_TEXTURES: Dictionary = {
 	"sentinel": preload("res://assets/bosses/sentinel_idle.png"),
@@ -1928,7 +1928,7 @@ func _build_pause() -> void:
 	var menu_button: Button = _make_button("MENU PRINCIPAL", Vector2(62.0, 286.0), Vector2(376.0, 56.0), false)
 	menu_button.pressed.connect(_menu_from_pause)
 	card.add_child(menu_button)
-	card.add_child(_make_label("ÉCHAP  •  REPRENDRE     |     V49.3", Vector2(0.0, 375.0), Vector2(500.0, 22.0), 11, Color("87999e"), HORIZONTAL_ALIGNMENT_CENTER))
+	card.add_child(_make_label("ÉCHAP  •  REPRENDRE     |     V49.4", Vector2(0.0, 375.0), Vector2(500.0, 22.0), 11, Color("87999e"), HORIZONTAL_ALIGNMENT_CENTER))
 
 func _build_game_over() -> void:
 	game_over = Control.new()
@@ -4165,7 +4165,7 @@ func _trigger_rift_surge() -> void:
 		return
 	var event_roll: int = rng.randi_range(0, 3)
 	if event_roll == 0:
-		_show_toast("SURGE DE RIFT  •  CONTACTS EN APPROCHE")
+		_show_toast("SURSAUT DU RIFT  •  CONTACTS EN APPROCHE")
 		_flash_rift_overlay()
 		_spawn_pulse_fx(Color(0.72, 0.38, 1.0, 0.62), 2.8, 0.55)
 		var count: int = mini(7, 4 + floori(float(level) / 4.0))
