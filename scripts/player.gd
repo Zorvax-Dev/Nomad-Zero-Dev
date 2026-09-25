@@ -212,7 +212,7 @@ func set_selection_lock(locked: bool) -> void:
 
 func heal(amount: float) -> void:
 	if active: health = minf(max_health, health + maxf(0.0, amount))
-func restore_shield(amount: float) -> void:
+func restore_force(amount: float) -> void:
 	if not active:
 		return
 	var cooldown_reduction: float = maxf(0.55, amount * 0.055)
