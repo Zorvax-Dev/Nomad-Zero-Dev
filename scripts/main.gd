@@ -61,8 +61,8 @@ const LEGACY_SAVE_PATH: String = "user://rift_nomad_stylized.cfg"
 const SAVE_VERSION: int = 9
 const RUN_SAVE_VERSION: int = 1
 const AUTOSAVE_INTERVAL: float = 12.0
-const APP_VERSION: String = "48.2.2"
-const BUILD_NAME: String = "V48.2c • CIMETIÈRE COHÉRENT"
+const APP_VERSION: String = "49.0.0"
+const BUILD_NAME: String = "V49.0 • OVERHAUL GLOBAL"
 const BOSS_CUTOUT: Shader = preload("res://assets/bosses/boss_cutout.gdshader")
 const BOSS_TEXTURES: Dictionary = {
 	"sentinel": preload("res://assets/bosses/sentinel_idle.png"),
@@ -287,6 +287,7 @@ var active_zone_name: String = ""
 var zone_stay_timer: float = 0.0
 var camp_support_timer: float = 0.0
 var central_supply_timer: float = 0.0
+var survival_relief_timer: float = 0.0
 var zone_logic_accumulator: float = 0.0
 var run_modules: Dictionary = {}
 var run_module_count: int = 0
@@ -1910,7 +1911,7 @@ func _build_pause() -> void:
 	var menu_button: Button = _make_button("MENU PRINCIPAL", Vector2(62.0, 286.0), Vector2(376.0, 56.0), false)
 	menu_button.pressed.connect(_menu_from_pause)
 	card.add_child(menu_button)
-	card.add_child(_make_label("ÉCHAP  •  REPRENDRE     |     V48.2c", Vector2(0.0, 375.0), Vector2(500.0, 22.0), 11, Color("87999e"), HORIZONTAL_ALIGNMENT_CENTER))
+	card.add_child(_make_label("ÉCHAP  •  REPRENDRE     |     V49.0", Vector2(0.0, 375.0), Vector2(500.0, 22.0), 11, Color("87999e"), HORIZONTAL_ALIGNMENT_CENTER))
 
 func _build_game_over() -> void:
 	game_over = Control.new()
@@ -2041,6 +2042,7 @@ func _reset_run_state() -> void:
 	zone_stay_timer = 0.0
 	camp_support_timer = 1.8
 	central_supply_timer = 0.0
+	survival_relief_timer = 6.0
 	zone_logic_accumulator = 0.0
 	run_modules.clear()
 	run_module_count = 0
@@ -2084,6 +2086,8 @@ func _begin_run(resumed: bool = false) -> void:
 	pause_panel.visible = false
 	joystick.enabled = not rotation_blocked
 	_show_toast("VAGUE %d  •  REPRISE" % wave_number if resumed else "VAGUE 1  •  DÉPLOIEMENT")
+	if not resumed:
+		_show_presentation("NØMAD ZERO", "SURVIS • EXPLORE • CONSOLIDE TON BUILD", Color("efc58f"), 0.78, false)
 	_save_profile()
 
 func _is_valid_saved_run(candidate: Variant) -> bool:
@@ -2525,6 +2529,32 @@ func _count_nearby_enemies(origin: Vector2, radius: float) -> int:
 			count += 1
 	return count
 
+func _count_nearby_supplies(origin: Vector2, radius: float, preferred_kind: String = "") -> int:
+	if pickups_root == null:
+		return 0
+	var radius_sq: float = radius * radius
+	var count: int = 0
+	for node: Node in pickups_root.get_children():
+		var supply: NomadSupplyPickup = node as NomadSupplyPickup
+		if supply != null and not supply.is_queued_for_deletion():
+			if preferred_kind.is_empty() or supply.kind == preferred_kind:
+				if origin.distance_squared_to(supply.global_position) <= radius_sq:
+					count += 1
+	return count
+
+func _request_emergency_support(_zone: String = "") -> void:
+	if not is_instance_valid(player):
+		return
+	var health_ratio: float = player.health / maxf(1.0, player.max_health)
+	var kind: String = "med"
+	if health_ratio >= 0.26 and player.max_shield > 0.0 and player.shield < player.max_shield * 0.28:
+		kind = "shield"
+	elif health_ratio >= 0.38 and player.pulse_timer > 1.8 and player.dash_timer > 0.9:
+		kind = "charge"
+	_spawn_supply(player.global_position + Vector2(rng.randf_range(-58.0, 58.0), rng.randf_range(-40.0, 40.0)), kind)
+	survival_relief_timer = 20.0 if kind == "med" else 18.0
+	_show_toast("BALISE NOMADE  •  RAVITAILLEMENT D’URGENCE")
+
 func _player_zone() -> String:
 	if not is_instance_valid(player):
 		return ""
@@ -2608,6 +2638,7 @@ func _update_zone_gameplay(delta: float) -> void:
 	zone_stay_timer += delta
 	camp_support_timer = maxf(0.0, camp_support_timer - delta)
 	central_supply_timer = maxf(0.0, central_supply_timer - delta)
+	survival_relief_timer = maxf(0.0, survival_relief_timer - delta)
 	if zone == "CAMP NOMADE" and camp_support_timer <= 0.0:
 		camp_support_timer = 7.5
 		var nearby_threats: int = _count_nearby_enemies(player.global_position, 300.0)
@@ -2619,6 +2650,14 @@ func _update_zone_gameplay(delta: float) -> void:
 	elif zone == "PLAINE CENTRALE" and central_supply_timer <= 0.0 and zone_stay_timer >= 8.0 and _active_enemy_count() >= 4 and rng.randf() < delta * 0.45:
 		central_supply_timer = 18.0
 		_spawn_rift_fragment(player.global_position + Vector2(rng.randf_range(-70.0, 70.0), rng.randf_range(-55.0, 55.0)), 1)
+	elif zone == "AVANT-POSTE" and central_supply_timer <= 0.0 and zone_stay_timer >= 10.0 and _count_nearby_enemies(player.global_position, 255.0) <= 3 and rng.randf() < delta * 0.36:
+		central_supply_timer = 22.0
+		_spawn_supply(player.global_position + Vector2(rng.randf_range(-62.0, 62.0), rng.randf_range(-42.0, 44.0)), "charge")
+	elif zone == "CIMETIÈRE D’ÉPAVES" and central_supply_timer <= 0.0 and zone_stay_timer >= 11.0 and _count_nearby_enemies(player.global_position, 255.0) <= 3 and rng.randf() < delta * 0.30:
+		central_supply_timer = 24.0
+		_spawn_supply(player.global_position + Vector2(rng.randf_range(-58.0, 58.0), rng.randf_range(-40.0, 44.0)), "shield" if rng.randf() < 0.55 else "charge")
+	if survival_relief_timer <= 0.0 and player.health < player.max_health * 0.34 and _count_nearby_supplies(player.global_position, 180.0, "med") <= 0:
+		_request_emergency_support(zone)
 	_update_zone_status_text(zone)
 
 func _update_zone_status_text(zone: String) -> void:
@@ -2670,11 +2709,19 @@ func _update_wave(delta: float) -> void:
 	# Le budget de menace évite par exemple 15 ennemis + plusieurs Briseurs + élites
 	# au même instant. La zone influe encore légèrement sur la densité maximale.
 	var pattern: String = _wave_pattern()
+	var health_relief: float = 0.0
+	if is_instance_valid(player):
+		var health_ratio: float = player.health / maxf(1.0, player.max_health)
+		if health_ratio < 0.60:
+			health_relief = (0.60 - health_ratio) / 0.60
+			if dynamic_event_active:
+				health_relief *= 0.75
 	var count_cap: int = 7 + mini(8, floori(float(maxi(0, wave_number - 1)) * 0.42)) + clampi(density_bonus, -1, 1)
 	if pattern == "chasse": count_cap += 1
 	elif pattern == "boss": count_cap -= 2
-	count_cap = clampi(count_cap, 6, MAX_ACTIVE_ENEMIES)
-	var threat_budget: float = _wave_threat_budget()
+	count_cap -= int(floor(health_relief * 2.4))
+	count_cap = clampi(count_cap, 5, MAX_ACTIVE_ENEMIES)
+	var threat_budget: float = _wave_threat_budget() * (1.0 - health_relief * 0.16)
 	if _active_enemy_count() < count_cap and _active_enemy_threat() < threat_budget and spawn_timer <= 0.0:
 		var spawn_pressure: float = 0.0
 		if zone == "RAFFINERIE":
@@ -2683,6 +2730,7 @@ func _update_wave(delta: float) -> void:
 			spawn_pressure = 0.020
 		var wave_pressure: float = minf(0.16, float(maxi(wave_number - 1, 0)) * 0.008)
 		var spawn_interval: float = 0.92 - wave_pressure - minf(0.055, float(level - 1) * 0.0025) - spawn_pressure
+		spawn_interval *= 1.0 + health_relief * 0.22
 		if pattern == "chasse": spawn_interval *= 0.78
 		elif pattern == "barrage": spawn_interval *= 0.84
 		elif pattern == "bastion": spawn_interval *= 0.92
@@ -3301,6 +3349,12 @@ func _on_enemy_died(enemy: NomadEnemy, value: int) -> void:
 		_shake(3.5, 0.13)
 		if rng.randf() < 0.24:
 			_spawn_supply(death_position, "med" if rng.randf() < 0.55 else "charge")
+	if is_instance_valid(player):
+		var health_ratio: float = player.health / maxf(1.0, player.max_health)
+		if not was_boss and not was_miniboss and not was_elite and health_ratio < 0.24 and rng.randf() < 0.05:
+			_spawn_supply(death_position + Vector2(rng.randf_range(-14.0, 14.0), -12.0), "med")
+		elif not was_boss and not was_miniboss and health_ratio < 0.42 and rng.randf() < 0.025:
+			_spawn_supply(death_position + Vector2(rng.randf_range(-16.0, 16.0), -12.0), "shield")
 	if rng.randf() < 0.012:
 		_spawn_supply(death_position, "shield")
 
@@ -3316,8 +3370,8 @@ func _level_up() -> void:
 	level += 1
 	xp_needed = 30 + (level - 1) * 16 + maxi(0, level - 10) * 4
 	pending_level_choices += 1
-	player.heal(minf(18.0, player.max_health * 0.035))
-	player.restore_shield(10.0)
+	player.heal(minf(20.0, player.max_health * 0.045))
+	player.restore_shield(12.0)
 	_play_sfx(SFX_LEVEL, -8.0, 1.0, 1.0)
 	_shake(3.5, 0.13)
 	_spawn_pulse_fx(Color(1.0, 0.78, 0.32, 0.82), 1.55, 0.42)
@@ -3763,14 +3817,14 @@ func _on_supply_collected(kind: String) -> void:
 		return
 	match kind:
 		"med":
-			player.heal(minf(48.0, maxf(24.0, player.max_health * 0.12)))
+			player.heal(minf(52.0, maxf(26.0, player.max_health * 0.13)))
 			_show_toast("MÉDIPACK  •  INTÉGRITÉ RESTAURÉE")
 		"shield":
-			player.restore_shield(24.0)
-			_show_toast("CELLULE DE FORCE  •  ONDE ACCÉLÉRÉE")
+			player.restore_shield(26.0)
+			_show_toast("CELLULE DE BOUCLIER  •  DÉFENSE RESTAURÉE")
 		_:
-			player.pulse_timer = maxf(0.0, player.pulse_timer - 3.0)
-			player.dash_timer = maxf(0.0, player.dash_timer - 1.8)
+			player.pulse_timer = maxf(0.0, player.pulse_timer - 3.2)
+			player.dash_timer = maxf(0.0, player.dash_timer - 1.9)
 			_show_toast("CELLULE D'ÉNERGIE  •  RECHARGES ACCÉLÉRÉES")
 	_play_sfx(SFX_XP, -14.0, 1.10, 1.18)
 
