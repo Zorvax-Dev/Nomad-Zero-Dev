@@ -1675,6 +1675,74 @@ func _make_upgrade_option(upgrade_id: String, rarity: String) -> Dictionary:
 			description = "Recharge immédiatement l'onde de Force"
 	return {"id": upgrade_id, "rarity": rarity, "multiplier": multiplier, "title": title, "description": description}
 
+func _upgrade_weight(upgrade_id: String) -> float:
+	if not is_instance_valid(player):
+		return 1.0
+	var weight: float = 1.0
+	match upgrade_id:
+		"damage":
+			if player.critical_chance >= 0.125 and not run_synergies.has("precision_blade"):
+				weight += 0.75
+		"critical":
+			if player.damage >= 33.0 and not run_synergies.has("precision_blade"):
+				weight += 0.85
+		"range":
+			if player.multishot_count >= 2 and not run_synergies.has("wide_hunt"):
+				weight += 0.75
+		"chain":
+			if player.saber_range >= 232.0 and not run_synergies.has("wide_hunt"):
+				weight += 0.95
+		"force":
+			if player.armor >= 0.07 and not run_synergies.has("force_echo"):
+				weight += 0.65
+			if player.magnet_range >= 305.0 and not run_synergies.has("rift_conductor"):
+				weight += 0.70
+		"armor":
+			if player.pulse_cooldown <= 4.20 and not run_synergies.has("force_echo"):
+				weight += 0.72
+			if player.max_health >= 225.0 and not run_synergies.has("iron_will"):
+				weight += 0.60
+		"speed":
+			if player.attack_interval <= 0.395 and not run_synergies.has("nomad_flow"):
+				weight += 0.72
+		"cadence":
+			if player.speed >= 322.0 and not run_synergies.has("nomad_flow"):
+				weight += 0.72
+		"magnet":
+			if player.pulse_cooldown <= 3.95 and not run_synergies.has("rift_conductor"):
+				weight += 0.70
+		"hull":
+			if player.armor >= 0.115 and not run_synergies.has("iron_will"):
+				weight += 0.72
+		"regen":
+			if player.max_health >= 250.0:
+				weight += 0.20
+		"siphon":
+			if player.max_health >= 230.0:
+				weight += 0.16
+		"fortune":
+			if run_fragment_bonus_chance < 0.045:
+				weight += 0.14
+		_:
+			pass
+	# Ne jamais transformer le choix en rail : la pondération aide un build à se structurer,
+	# mais chaque niveau garde une part d'imprévu.
+	return clampf(weight, 0.65, 2.15)
+
+func _weighted_upgrade_pick(pool: Array[String]) -> String:
+	if pool.is_empty():
+		return ""
+	var total: float = 0.0
+	for upgrade_id: String in pool:
+		total += _upgrade_weight(upgrade_id)
+	var roll: float = rng.randf_range(0.0, maxf(0.001, total))
+	var cursor: float = 0.0
+	for upgrade_id: String in pool:
+		cursor += _upgrade_weight(upgrade_id)
+		if roll <= cursor:
+			return upgrade_id
+	return pool[pool.size() - 1]
+
 func _generate_upgrade_options() -> Array[Dictionary]:
 	var pool: Array[String] = ["damage", "cadence", "range", "chain", "critical", "crit_power", "speed", "hull", "force", "regen", "armor", "magnet", "siphon", "fortune"]
 	if is_instance_valid(player):
@@ -1708,9 +1776,10 @@ func _generate_upgrade_options() -> Array[Dictionary]:
 			pool.erase("fortune")
 	var options: Array[Dictionary] = []
 	while options.size() < 3 and not pool.is_empty():
-		var index: int = rng.randi_range(0, pool.size() - 1)
-		var upgrade_id: String = pool[index]
-		pool.remove_at(index)
+		var upgrade_id: String = _weighted_upgrade_pick(pool)
+		if upgrade_id.is_empty():
+			break
+		pool.erase(upgrade_id)
 		options.append(_make_upgrade_option(upgrade_id, _roll_upgrade_rarity()))
 	# Toujours trois choix même après avoir atteint les plafonds du build.
 	for fallback_id: String in ["repair", "salvage", "charge"]:
@@ -3975,8 +4044,17 @@ func _start_dynamic_world_event() -> bool:
 	if dynamic_event_active or not is_instance_valid(player) or wave_cleanup or is_instance_valid(boss_enemy):
 		return false
 	var pool: Array[String] = ["patrol", "cache"]
+	if wave_number >= 4:
+		pool.append("ambush")
 	if wave_number >= 6:
 		pool.append("miniboss")
+	if wave_number >= 7:
+		pool.append("corruption")
+	# À partir des vagues avancées, les événements orientés combat reçoivent un
+	# léger poids supplémentaire sans faire disparaître exploration et récupération.
+	if wave_number >= 10:
+		pool.append("ambush")
+		pool.append("corruption")
 	dynamic_event_kind = pool[rng.randi_range(0, pool.size() - 1)]
 	dynamic_event_position = _random_world_event_position()
 	dynamic_event_active = true
