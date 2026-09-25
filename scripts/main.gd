@@ -116,8 +116,7 @@ const RUN_SAVE_PROPERTIES = [
 	"zone_logic_accumulator", "run_modules", "run_module_count", "dynamic_event_active",
 	"dynamic_event_kind", "dynamic_event_position", "dynamic_event_started", "dynamic_event_progress",
 	"dynamic_event_target", "dynamic_event_spawn_timer", "dynamic_event_age", "dynamic_event_serial",
-	"dynamic_event_kills", "dynamic_event_target_kills", "skill_traction_cooldown_timer", "skill_surge_timer",
-	"skill_surge_cooldown_timer"
+	"dynamic_event_kills", "dynamic_event_target_kills"
 ]
 const PLAYER_SAVE_PROPERTIES = [
 	"speed", "max_health", "health", "max_shield", "shield", "damage",
@@ -281,8 +280,6 @@ var boss_event_count: int = 0
 var elites_killed: int = 0
 var stream_timer: float = 0.0
 var cleanup_timer: float = 0.0
-var overdrive_meter: float = 0.0
-var overdrive_time: float = 0.0
 var run_fragments: int = 0
 var rift_fragments: int = 0
 var run_xp_multiplier: float = 1.0
@@ -310,17 +307,10 @@ var dynamic_event_age: float = 0.0
 var dynamic_event_serial: int = 0
 var dynamic_event_kills: int = 0
 var dynamic_event_target_kills: int = 0
-# V44.42 — SURCHARGE reste un bonus temporaire non destructif : les stats de base ne sont jamais modifiées.
-var skill_traction_cooldown_timer: float = 0.0
-var skill_surge_timer: float = 0.0
-var skill_surge_cooldown_timer: float = 0.0
-var skill_surge_fx_timer: float = 0.0
 var loot_discovered: Dictionary = {}
 var boss_signatures: Dictionary = {}
 var canyon_secrets: Dictionary = {}
 var canyon_mastery: bool = false
-var overdrive_bar: ProgressBar
-var overdrive_label: Label
 var fragment_label: Label
 var zone_banner_panel: Panel
 var zone_banner_label: Label
@@ -1439,8 +1429,6 @@ func _build_hud() -> void:
 	shield_bar = ProgressBar.new()
 	shield_bar.max_value = 1.0
 	shield_bar.visible = false
-	overdrive_label = null
-	overdrive_bar = null
 
 	hud_wave_panel = Panel.new()
 	hud_wave_panel.add_theme_stylebox_override("panel", _style_panel(Color(0.020, 0.029, 0.036, 0.88), Color(0.43, 0.48, 0.55, 0.36), 14, 4))
@@ -2054,8 +2042,6 @@ func _reset_run_state() -> void:
 	elites_killed = 0
 	stream_timer = 0.0
 	cleanup_timer = 0.0
-	overdrive_meter = 0.0
-	overdrive_time = 0.0
 	run_fragments = 0
 	run_xp_multiplier = 1.0
 	run_life_on_kill = 0.0
@@ -2089,10 +2075,6 @@ func _reset_run_state() -> void:
 	dynamic_event_age = 0.0
 	dynamic_event_kills = 0
 	dynamic_event_target_kills = 0
-	skill_traction_cooldown_timer = 0.0
-	skill_surge_timer = 0.0
-	skill_surge_cooldown_timer = 0.0
-	skill_surge_fx_timer = 0.0
 	_refresh_dynamic_event_marker()
 	boss_enemy = null
 	if boss_bar != null:
@@ -2349,7 +2331,6 @@ func _spawn_player() -> void:
 	player.died.connect(_on_player_died)
 	player.damaged.connect(_on_player_damaged)
 	player.dodged.connect(_on_player_dodged)
-	player.dash_used.connect(_on_player_dash_used)
 	world_entities.add_child(player)
 	world_camera = Camera2D.new()
 	world_camera.position_smoothing_enabled = true
@@ -2387,15 +2368,6 @@ func _update_game(delta: float) -> void:
 	attack_timer -= delta
 	spawn_timer -= delta
 	event_timer -= delta
-	skill_traction_cooldown_timer = maxf(0.0, skill_traction_cooldown_timer - delta)
-	skill_surge_timer = maxf(0.0, skill_surge_timer - delta)
-	skill_surge_cooldown_timer = maxf(0.0, skill_surge_cooldown_timer - delta)
-	skill_surge_fx_timer = maxf(0.0, skill_surge_fx_timer - delta)
-	if skill_surge_timer > 0.0 and skill_surge_fx_timer <= 0.0:
-		skill_surge_fx_timer = 0.34 if adaptive_quality == QUALITY_HIGH else (0.48 if adaptive_quality == QUALITY_BALANCED else 0.70)
-		_spawn_pulse_fx(Color(0.60, 0.34, 1.0, 0.30), 0.72, 0.24)
-	overdrive_time = skill_surge_timer
-	overdrive_meter = clampf(skill_surge_timer / maxf(0.01, _skill_surge_duration()), 0.0, 1.0)
 	zone_banner_timer = maxf(0.0, zone_banner_timer - delta)
 	stream_timer -= delta
 	cleanup_timer -= delta
@@ -2407,7 +2379,7 @@ func _update_game(delta: float) -> void:
 	if toast_timer <= 0.0:
 		toast_label.modulate.a = move_toward(toast_label.modulate.a, 0.0, delta * 4.5)
 	if attack_timer <= 0.0:
-		attack_timer = player.attack_interval * (0.68 if skill_surge_timer > 0.0 else 1.0)
+		attack_timer = player.attack_interval
 		_auto_attack()
 	_update_zone_banner(delta)
 	zone_logic_accumulator += delta
@@ -2608,9 +2580,7 @@ func _request_emergency_support(_zone: String = "") -> void:
 		return
 	var health_ratio: float = player.health / maxf(1.0, player.max_health)
 	var kind: String = "med"
-	if health_ratio >= 0.26 and player.max_shield > 0.0 and player.shield < player.max_shield * 0.28:
-		kind = "shield"
-	elif health_ratio >= 0.38 and player.pulse_timer > 1.8 and player.dash_timer > 0.9:
+	if health_ratio >= 0.38 and player.pulse_timer > 1.8:
 		kind = "charge"
 	_spawn_supply(player.global_position + Vector2(rng.randf_range(-58.0, 58.0), rng.randf_range(-40.0, 40.0)), kind)
 	survival_relief_timer = 20.0 if kind == "med" else 18.0
@@ -3174,10 +3144,8 @@ func _auto_attack() -> void:
 		var dir: Vector2 = to_enemy.normalized()
 		if dir.dot(attack_dir) < cone_cos:
 			continue
-		var surge_damage_multiplier: float = 1.36 if skill_surge_timer > 0.0 else 1.0
-		var surge_crit_bonus: float = 0.12 if skill_surge_timer > 0.0 else 0.0
-		var slash_damage: float = player.damage * surge_damage_multiplier * (1.0 + minf(0.16, float(combo) * 0.004))
-		var was_critical: bool = rng.randf() < minf(0.72, player.critical_chance + surge_crit_bonus)
+		var slash_damage: float = player.damage * (1.0 + minf(0.16, float(combo) * 0.004))
+		var was_critical: bool = rng.randf() < minf(0.72, player.critical_chance)
 		if was_critical:
 			slash_damage *= player.critical_multiplier
 		enemy.take_damage(slash_damage, was_critical)
@@ -3586,105 +3554,6 @@ func _use_pulse() -> void:
 	_shake(7.0 if hit_any else 3.2, 0.20 if hit_any else 0.10)
 	_haptic(46 if hit_any else 24, 0.62 if hit_any else 0.36, 0.15)
 
-func _use_dash() -> void:
-	if not _can_use_active_skill():
-		return
-	var direction: Vector2 = joystick.vector if joystick.vector.length_squared() > 0.01 else player.movement_direction()
-	if player.trigger_dash(direction):
-		_play_sfx(SFX_UI, -15.0, 1.15, 1.22)
-		_spawn_combat_text(player.global_position + Vector2(0.0, -64.0), "PHASE", Color("a8f6ff"), 15)
-		_shake(2.6, 0.10)
-		_haptic(20, 0.30, 0.10)
-
-func _skill_traction_cooldown() -> float:
-	var cooldown: float = 9.0 - float(meta_instinct_rank) * 0.08 - float(meta_scavenger_rank) * 0.10
-	if meta_archon_node:
-		cooldown -= 0.8
-	return maxf(5.8, cooldown)
-
-func _spawn_traction_line(from_position: Vector2, to_position: Vector2) -> void:
-	_trim_fx_budget()
-	var tether: Line2D = Line2D.new()
-	tether.width = 3.2
-	tether.default_color = Color(0.66, 0.42, 1.0, 0.78)
-	tether.add_point(Vector2.ZERO)
-	tether.add_point(to_position - from_position)
-	tether.global_position = from_position
-	tether.z_index = 3620
-	fx_root.add_child(tether)
-	var tween: Tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(tether, "modulate:a", 0.0, 0.20)
-	tween.tween_property(tether, "width", 1.0, 0.20)
-	tween.finished.connect(tether.queue_free)
-
-func _use_traction() -> void:
-	if not _can_use_active_skill() or skill_traction_cooldown_timer > 0.0:
-		return
-	var radius: float = 380.0 + float(meta_scavenger_rank) * 5.0
-	var affected: Array[NomadEnemy] = []
-	for node: Node in enemies_root.get_children():
-		var enemy: NomadEnemy = node as NomadEnemy
-		if enemy != null and enemy.active and player.global_position.distance_to(enemy.global_position) <= radius:
-			affected.append(enemy)
-	if affected.is_empty():
-		_show_toast("TRACTION  •  AUCUNE CIBLE À PORTÉE")
-		return
-	skill_traction_cooldown_timer = _skill_traction_cooldown()
-	var damage_amount: float = player.damage * (0.62 if skill_surge_timer <= 0.0 else 0.78)
-	var shown_lines: int = 0
-	for enemy: NomadEnemy in affected:
-		var enemy_position: Vector2 = enemy.global_position
-		enemy.take_damage(damage_amount)
-		if is_instance_valid(enemy) and enemy.active:
-			enemy.apply_knockback(player.global_position, -720.0)
-		if shown_lines < 8:
-			_spawn_traction_line(enemy_position, player.global_position)
-			shown_lines += 1
-	_spawn_pulse_fx(Color(0.65, 0.36, 1.0, 0.72), 1.30, 0.26)
-	_spawn_combat_text(player.global_position + Vector2(0.0, -74.0), "TRACTION", Color("d1b1ff"), 18)
-	_play_sfx(SFX_PULSE, -14.0, 0.78, 0.84)
-	_shake(5.4, 0.15)
-	_haptic(34, 0.50, 0.12)
-
-func _skill_surge_duration() -> float:
-	return 5.0 + float(meta_fury_rank) * 0.10 + (0.35 if meta_marauder_node else 0.0)
-
-func _skill_surge_cooldown() -> float:
-	var cooldown: float = 16.0 - float(meta_fury_rank) * 0.24 - float(meta_instinct_rank) * 0.05
-	if meta_archon_node:
-		cooldown -= 1.2
-	return maxf(11.5, cooldown)
-
-func _use_surge() -> void:
-	if not _can_use_active_skill() or skill_surge_timer > 0.0 or skill_surge_cooldown_timer > 0.0:
-		return
-	skill_surge_timer = _skill_surge_duration()
-	skill_surge_cooldown_timer = _skill_surge_cooldown()
-	skill_surge_fx_timer = 0.0
-	attack_timer = minf(attack_timer, player.attack_interval * 0.22)
-	_spawn_force_wave_fx(Color(0.62, 0.34, 1.0, 0.74), minf(180.0, player.force_wave_radius * 0.68))
-	_spawn_combat_text(player.global_position + Vector2(0.0, -78.0), "SURCHARGE", Color("d5adff"), 19)
-	_show_toast("SURCHARGE  •  DÉGÂTS +36 %  •  CADENCE +47 %")
-	_play_sfx(SFX_BOSS_PHASE, -14.0, 1.12, 1.16)
-	_shake(5.0, 0.16)
-	_haptic(40, 0.58, 0.13)
-
-func _on_player_dash_used(from_position: Vector2, to_position: Vector2) -> void:
-	var delta: Vector2 = to_position - from_position
-	for i: int in range(5):
-		var ghost: Sprite2D = Sprite2D.new()
-		ghost.texture = HERO_PREVIEW
-		ghost.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-		ghost.scale = Vector2(0.41, 0.41)
-		ghost.modulate = Color(0.42, 0.91, 1.0, 0.28 - float(i) * 0.035)
-		ghost.global_position = from_position + delta * (float(i) / 5.0)
-		ghost.z_index = 3400
-		fx_root.add_child(ghost)
-		var tween: Tween = create_tween()
-		tween.tween_property(ghost, "modulate:a", 0.0, 0.18 + float(i) * 0.02)
-		tween.finished.connect(ghost.queue_free)
-
 func _safe_pickup_position(position_value: Vector2, radius: float = 18.0) -> Vector2:
 	if world == null:
 		return position_value
@@ -3856,8 +3725,7 @@ func _apply_loot_module(module_id: String) -> void:
 		"edge_tuning":
 			player.damage *= 1.038
 		"servo_joint":
-			player.speed += 8.0
-			player.dash_cooldown = maxf(1.75, player.dash_cooldown - 0.06)
+			player.speed += 10.0
 		"scavenger_magnet":
 			player.magnet_range += 24.0
 			run_fragment_bonus_chance += 0.006
@@ -3994,11 +3862,10 @@ func _on_supply_collected(kind: String) -> void:
 			_show_toast("MÉDIPACK  •  INTÉGRITÉ RESTAURÉE")
 		"shield":
 			player.restore_shield(26.0)
-			_show_toast("CELLULE DE BOUCLIER  •  DÉFENSE RESTAURÉE")
+			_show_toast("CELLULE DE FORCE  •  ONDE ACCÉLÉRÉE")
 		_:
-			player.pulse_timer = maxf(0.0, player.pulse_timer - 3.2)
-			player.dash_timer = maxf(0.0, player.dash_timer - 1.9)
-			_show_toast("CELLULE D'ÉNERGIE  •  RECHARGES ACCÉLÉRÉES")
+			player.pulse_timer = maxf(0.0, player.pulse_timer - 3.8)
+			_show_toast("CELLULE D'ÉNERGIE  •  ONDE ACCÉLÉRÉE")
 	_play_sfx(SFX_XP, -14.0, 1.10, 1.18)
 
 func _dynamic_event_name(kind: String) -> String:
@@ -5151,14 +5018,9 @@ func _update_meta_buttons() -> void:
 	var archon_status: String = "ACTIVÉ" if meta_archon_node else ("RELIQUE MANQUANTE" if not archon_found else ("PROSPECTION 3 REQUISE" if meta_scavenger_rank < 3 else "%d FRAG." % relic_cost))
 	_set_meta_tree_button("marauder", "BRAISE DU MARAUDEUR\n+8 %% dégâts  •  +14 portée\n%s" % marauder_status, not meta_marauder_node and marauder_found and meta_fury_rank >= 3 and rift_fragments >= relic_cost, Color("ff6a45"))
 	_set_meta_tree_button("sentinel", "BASTION SENTINELLE\n+40 PV  •  armure  •  onde\n%s" % sentinel_status, not meta_sentinel_node and sentinel_found and meta_resilience_rank >= 3 and rift_fragments >= relic_cost, Color("67ccff"))
-	_set_meta_tree_button("archon", "CONDUIT DE L’ARCHONTE\nonde + dash + aimant\n%s" % archon_status, not meta_archon_node and archon_found and meta_scavenger_rank >= 3 and rift_fragments >= relic_cost, Color("b7ff82"))
+	_set_meta_tree_button("archon", "CONDUIT DE L’ARCHONTE\nonde + vitesse + aimant\n%s" % archon_status, not meta_archon_node and archon_found and meta_scavenger_rank >= 3 and rift_fragments >= relic_cost, Color("b7ff82"))
 	if meta_tree_hint_label != null:
 		meta_tree_hint_label.text = "Nœuds de relique : récupère d’abord l’objet signature du boss, puis atteins le rang 3 de sa spécialisation."
-
-func _activate_overdrive() -> void:
-	overdrive_meter = 0.0
-	overdrive_time = 0.0
-	return
 
 func _spawn_rift_fragment(position_value: Vector2, value: int, age_value: float = 0.0) -> void:
 	if not is_instance_valid(player):
@@ -5504,9 +5366,6 @@ func _backup_config_is_valid(config: ConfigFile) -> bool:
 				if int(version) < 7 and field in ["run_modules", "run_module_count"]:
 					continue
 				if int(version) < 9 and field in ["dynamic_event_active", "dynamic_event_kind", "dynamic_event_position", "dynamic_event_started", "dynamic_event_progress", "dynamic_event_target", "dynamic_event_spawn_timer", "dynamic_event_age", "dynamic_event_serial", "dynamic_event_kills", "dynamic_event_target_kills"]:
-					continue
-				# V44.42 garde save v9 : ces deux champs restent optionnels pour importer un backup V44.41.
-				if field in ["skill_traction_cooldown_timer", "skill_surge_timer", "skill_surge_cooldown_timer"]:
 					continue
 				return false
 			if typeof(checkpoint.get(field)) != typeof(get(field)):
