@@ -41,7 +41,7 @@ func _create_decor_sprites() -> void:
 	_add_decor("CampNorthWest", CAMP_TEXTURE, Vector2(500.0, 500.0), 0.440859, false)
 	_add_decor("RefineryNorthEast", REFINERY_TEXTURE, Vector2(2520.0, 520.0), 0.465352, true)
 	_add_decor("WreckSouth", WRECK_TEXTURE, Vector2(1620.0, 1485.0), 0.538828, false)
-	_add_decor("OutpostSouthEast", OUTPOST_TEXTURE, Vector2(2460.0, 1480.0), 0.330645, true)
+	_add_decor("OutpostSouthEast", OUTPOST_TEXTURE, Vector2(2460.0, 1480.0), 0.37, true)
 	_add_decor("RockWest", ROCK_TEXTURE, Vector2(650.0, 1205.0), 0.52, false)
 	_add_decor("RockEast", ROCK_TEXTURE_MIRROR, Vector2(2250.0, 1150.0), 0.49, false)
 	_add_decor("RockCenterLeft", ROCK_TEXTURE, Vector2(1120.0, 850.0), 0.32, false)
@@ -53,13 +53,18 @@ func _create_decor_sprites() -> void:
 	_add_decor("CanyonGateSouth", CANYON_ROCK_TEXTURE, Vector2(3290.0, 1540.0), 0.34, true)
 	_add_decor("CanyonRockNorth", CANYON_ROCK_TEXTURE, Vector2(3540.0, 610.0), 0.31, true)
 	_add_decor("CanyonRockSouth", CANYON_ROCK_TEXTURE, Vector2(3490.0, 1515.0), 0.29, false)
-	_add_decor("EchoRuins", ECHO_RUINS_TEXTURE, Vector2(3630.0, 1310.0), 0.40, false)
-	_add_decor("EchoSpire", ECHO_SPIRE_TEXTURE, Vector2(3920.0, 820.0), 0.43, false)
-	# V48.0 — Cimetière d’Épaves : extension méridionale à identité industrielle.
-	_add_decor("LeviathanWreck", LEVIATHAN_TEXTURE, Vector2(2150.0, 2670.0), 0.58, false)
-	_add_decor("SalvageStation", SALVAGE_RIG_TEXTURE, Vector2(900.0, 2620.0), 0.40, true)
-	_add_decor("IronPit", IRON_PIT_TEXTURE, Vector2(3070.0, 2480.0), 0.50, false)
-	_add_decor("ScrapHeapEast", SCRAP_HEAP_TEXTURE, Vector2(2660.0, 2860.0), 0.34, false)
+	_add_decor("EchoRuins", ECHO_RUINS_TEXTURE, Vector2(3630.0, 1310.0), 0.50, false)
+	_add_decor("EchoSpire", ECHO_SPIRE_TEXTURE, Vector2(3920.0, 820.0), 0.55, false)
+	_add_decor("CanyonRockEast", CANYON_ROCK_TEXTURE, Vector2(3870.0, 1570.0), 0.24, true)
+	# V49.6 — densité visuelle revue avec uniquement les assets existants de la zone :
+	# les volumes sont plus présents sans changer la palette ni introduire un nouveau style.
+	_add_decor("LeviathanWreck", LEVIATHAN_TEXTURE, Vector2(2150.0, 2670.0), 0.62, false)
+	_add_decor("SalvageStation", SALVAGE_RIG_TEXTURE, Vector2(900.0, 2620.0), 0.46, true)
+	_add_decor("IronPit", IRON_PIT_TEXTURE, Vector2(3070.0, 2480.0), 0.60, false)
+	_add_decor("ScrapHeapEast", SCRAP_HEAP_TEXTURE, Vector2(2660.0, 2860.0), 0.42, false)
+	_add_decor("ScrapHeapWest", SCRAP_HEAP_TEXTURE, Vector2(1380.0, 2840.0), 0.30, true)
+	_add_decor("ScrapHeapSouthEast", SCRAP_HEAP_TEXTURE, Vector2(3430.0, 2840.0), 0.28, true)
+	_add_decor("ScrapHeapNorth", SCRAP_HEAP_TEXTURE, Vector2(2700.0, 2260.0), 0.25, true)
 
 func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool) -> void:
 	# V46.3: les structures reposent sur un sol localement tassé et le réseau de chemins
@@ -106,7 +111,7 @@ func _build_blockers() -> void:
 	_add_ellipse(Vector2(1320.0, 1470.0), Vector2(90.0, 70.0))
 	_add_ellipse(Vector2(1870.0, 1510.0), Vector2(92.0, 70.0))
 	# South-east camp
-	_add_ellipse(Vector2(2460.0, 1515.0), Vector2(165.0, 112.0))
+	_add_ellipse(Vector2(2460.0, 1515.0), Vector2(185.0, 126.0))
 	# Rock groups around the central lanes
 	_add_ellipse(Vector2(650.0, 1250.0), Vector2(135.0, 92.0))
 	_add_ellipse(Vector2(2250.0, 1190.0), Vector2(130.0, 90.0))
@@ -123,14 +128,19 @@ func _build_blockers() -> void:
 	_add_ellipse(Vector2(3290.0, 1570.0), Vector2(100.0, 70.0))
 	_add_ellipse(Vector2(3540.0, 642.0), Vector2(90.0, 62.0))
 	_add_ellipse(Vector2(3490.0, 1548.0), Vector2(86.0, 60.0))
-	_add_ellipse(Vector2(3630.0, 1335.0), Vector2(112.0, 82.0))
-	_add_ellipse(Vector2(3920.0, 845.0), Vector2(88.0, 74.0))
-	# V48.0 — Cimetière d’Épaves. Les volumes suivent les carcasses, pas les routes.
-	_add_ellipse(Vector2(2150.0, 2690.0), Vector2(315.0, 150.0))
+	_add_ellipse(Vector2(3630.0, 1335.0), Vector2(135.0, 100.0))
+	_add_ellipse(Vector2(3920.0, 845.0), Vector2(105.0, 88.0))
+	_add_ellipse(Vector2(3870.0, 1600.0), Vector2(68.0, 48.0))
+	# Cimetière d’Épaves. Les collisions restent légèrement à l'intérieur des silhouettes
+	# pour que le glissement le long des carcasses reste naturel sur écran tactile.
+	_add_ellipse(Vector2(2150.0, 2690.0), Vector2(335.0, 160.0))
 	_add_ellipse(Vector2(2370.0, 2525.0), Vector2(115.0, 95.0))
-	_add_ellipse(Vector2(790.0, 2700.0), Vector2(245.0, 170.0))
-	_add_ellipse(Vector2(3160.0, 2515.0), Vector2(178.0, 132.0))
-	_add_ellipse(Vector2(2760.0, 2880.0), Vector2(150.0, 98.0))
+	_add_ellipse(Vector2(790.0, 2700.0), Vector2(270.0, 185.0))
+	_add_ellipse(Vector2(3160.0, 2515.0), Vector2(210.0, 152.0))
+	_add_ellipse(Vector2(2760.0, 2880.0), Vector2(180.0, 116.0))
+	_add_ellipse(Vector2(1380.0, 2860.0), Vector2(90.0, 62.0))
+	_add_ellipse(Vector2(3430.0, 2860.0), Vector2(84.0, 58.0))
+	_add_ellipse(Vector2(2700.0, 2280.0), Vector2(76.0, 52.0))
 	_add_ellipse(Vector2(1250.0, 2260.0), Vector2(145.0, 74.0))
 	# Soft rocky rim from the background image so the player cannot walk on those visible edges.
 	_add_ellipse(Vector2(170.0, 180.0), Vector2(210.0, 105.0))
