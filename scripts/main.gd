@@ -196,7 +196,6 @@ var time_label: Label
 var zone_label: Label
 var danger_label: Label
 # V44.42 — touches actives tactiles. Le joystick réserve tout le bloc.
-var shield_bar: ProgressBar
 var force_status_label: Label
 var event_label: Label
 var boss_bar: ProgressBar
@@ -1426,9 +1425,6 @@ func _build_hud() -> void:
 	hud_status.add_child(xp_label)
 
 	force_status_label = null
-	shield_bar = ProgressBar.new()
-	shield_bar.max_value = 1.0
-	shield_bar.visible = false
 
 	hud_wave_panel = Panel.new()
 	hud_wave_panel.add_theme_stylebox_override("panel", _style_panel(Color(0.020, 0.029, 0.036, 0.88), Color(0.43, 0.48, 0.55, 0.36), 14, 4))
@@ -1650,7 +1646,7 @@ func _make_upgrade_option(upgrade_id: String, rarity: String) -> Dictionary:
 			title = "RENFORT BIO"
 			var displayed_gain: float = minf(16.0 * multiplier, maxf(0.0, 560.0 - player.max_health)) if is_instance_valid(player) else 16.0 * multiplier
 			description = "+%d PV max  •  soin immédiat" % roundi(displayed_gain)
-		"shield":
+		"force":
 			title = "ONDE DE FORCE"
 			description = "recharge plus vite  •  onde plus large"
 		"regen":
@@ -1680,7 +1676,7 @@ func _make_upgrade_option(upgrade_id: String, rarity: String) -> Dictionary:
 	return {"id": upgrade_id, "rarity": rarity, "multiplier": multiplier, "title": title, "description": description}
 
 func _generate_upgrade_options() -> Array[Dictionary]:
-	var pool: Array[String] = ["damage", "cadence", "range", "chain", "critical", "crit_power", "speed", "hull", "shield", "regen", "armor", "magnet", "siphon", "fortune"]
+	var pool: Array[String] = ["damage", "cadence", "range", "chain", "critical", "crit_power", "speed", "hull", "force", "regen", "armor", "magnet", "siphon", "fortune"]
 	if is_instance_valid(player):
 		if player.damage >= 220.0:
 			pool.erase("damage")
@@ -1699,7 +1695,7 @@ func _generate_upgrade_options() -> Array[Dictionary]:
 		if player.max_health >= 560.0:
 			pool.erase("hull")
 		if player.pulse_cooldown <= 2.6:
-			pool.erase("shield")
+			pool.erase("force")
 		if player.regeneration >= 1.6:
 			pool.erase("regen")
 		if player.armor >= 0.31:
@@ -1810,7 +1806,7 @@ func _apply_level_upgrade(option: Dictionary) -> void:
 			var health_gain: float = minf(560.0 - player.max_health, 16.0 * multiplier)
 			player.max_health += health_gain
 			player.heal(health_gain * 1.25)
-		"shield":
+		"force", "shield":
 			player.pulse_cooldown = maxf(2.6, player.pulse_cooldown - 0.26 * multiplier)
 			player.force_wave_radius += 14.0 * multiplier
 			player.force_wave_damage_scale += 0.05 * multiplier
@@ -2730,7 +2726,7 @@ func _update_zone_gameplay(delta: float) -> void:
 		_spawn_supply(player.global_position + Vector2(rng.randf_range(-62.0, 62.0), rng.randf_range(-42.0, 44.0)), "charge")
 	elif zone == "CIMETIÈRE D’ÉPAVES" and central_supply_timer <= 0.0 and zone_stay_timer >= 11.0 and _count_nearby_enemies(player.global_position, 255.0) <= 3 and rng.randf() < delta * 0.30:
 		central_supply_timer = 24.0
-		_spawn_supply(player.global_position + Vector2(rng.randf_range(-58.0, 58.0), rng.randf_range(-40.0, 44.0)), "shield" if rng.randf() < 0.55 else "charge")
+		_spawn_supply(player.global_position + Vector2(rng.randf_range(-58.0, 58.0), rng.randf_range(-40.0, 44.0)), "charge")
 	if survival_relief_timer <= 0.0 and player.health < player.max_health * 0.34 and _count_nearby_supplies(player.global_position, 180.0, "med") <= 0:
 		_request_emergency_support(zone)
 	_update_zone_status_text(zone)
@@ -3442,7 +3438,7 @@ func _on_enemy_died(enemy: NomadEnemy, value: int) -> void:
 		boss_bar.visible = false
 		boss_label.text = ""
 		_spawn_supply(death_position + Vector2(-28.0, 10.0), "med")
-		_spawn_supply(death_position + Vector2(28.0, 10.0), "shield")
+		_spawn_supply(death_position + Vector2(28.0, 10.0), "charge")
 		_spawn_supply(death_position + Vector2(0.0, -20.0), "charge")
 		var reward: String = _grant_boss_reward(enemy.kind)
 		_spawn_loot_roll(death_position + Vector2(48.0, -18.0), 4, "BOSS")
@@ -3456,7 +3452,7 @@ func _on_enemy_died(enemy: NomadEnemy, value: int) -> void:
 	elif was_miniboss:
 		_spawn_rift_fragment(death_position + Vector2(0.0, -18.0), 2)
 		_spawn_loot_roll(death_position + Vector2(34.0, -18.0), 3, "MINI-BOSS")
-		_spawn_supply(death_position + Vector2(-30.0, 8.0), "charge" if enemy.kind in ["veil_guardian", "leviathan_grinder"] else ("shield" if enemy.kind == "phantom" else "med"))
+		_spawn_supply(death_position + Vector2(-30.0, 8.0), "charge" if enemy.kind in ["veil_guardian", "leviathan_grinder", "phantom"] else "med")
 		var mini_color: Color = Color("70cfff") if enemy.kind == "phantom" else (Color("b57cff") if enemy.kind == "veil_guardian" else (Color("d9793c") if enemy.kind == "leviathan_grinder" else Color("ff9a4c")))
 		_show_presentation("MENACE ÉLITE NEUTRALISÉE", _miniboss_name(enemy.kind), mini_color, 0.72, false)
 		_play_sfx(SFX_MINIBOSS_ALERT, -9.0, 0.88, 0.94)
@@ -3465,7 +3461,7 @@ func _on_enemy_died(enemy: NomadEnemy, value: int) -> void:
 		elites_killed += 1
 		_spawn_rift_fragment(death_position, 1)
 		if rng.randf() < 0.65:
-			var supply_types: Array[String] = ["med", "shield", "charge"]
+			var supply_types: Array[String] = ["med", "charge"]
 			_spawn_supply(death_position, supply_types[rng.randi_range(0, supply_types.size() - 1)])
 		if rng.randf() < 0.09:
 			_spawn_loot_roll(death_position + Vector2(18.0, -20.0), 2, _player_zone())
@@ -3479,9 +3475,9 @@ func _on_enemy_died(enemy: NomadEnemy, value: int) -> void:
 		if not was_boss and not was_miniboss and not was_elite and health_ratio < 0.24 and rng.randf() < 0.05:
 			_spawn_supply(death_position + Vector2(rng.randf_range(-14.0, 14.0), -12.0), "med")
 		elif not was_boss and not was_miniboss and health_ratio < 0.42 and rng.randf() < 0.025:
-			_spawn_supply(death_position + Vector2(rng.randf_range(-16.0, 16.0), -12.0), "shield")
+			_spawn_supply(death_position + Vector2(rng.randf_range(-16.0, 16.0), -12.0), "charge")
 	if rng.randf() < 0.012:
-		_spawn_supply(death_position, "shield")
+		_spawn_supply(death_position, "charge")
 
 func _on_xp_collected(value: int) -> void:
 	xp += value
@@ -4187,7 +4183,7 @@ func _trigger_rift_surge() -> void:
 		_show_toast("CARGO DU RIFT  •  RAVITAILLEMENT CONTESTÉ")
 		_flash_rift_overlay(Color(0.22, 0.66, 0.82, 0.14))
 		_spawn_supply(player.global_position + Vector2(-70.0, -20.0), "med")
-		_spawn_supply(player.global_position + Vector2(70.0, -20.0), "shield")
+		_spawn_supply(player.global_position + Vector2(70.0, -20.0), "charge")
 		_spawn_supply(player.global_position + Vector2(0.0, 64.0), "charge")
 		for _i: int in range(3 + mini(3, floori(float(level) / 6.0))):
 			_spawn_enemy("", false)
@@ -5420,7 +5416,7 @@ func _backup_config_is_valid(config: ConfigFile) -> bool:
 				return false
 			if typeof(option.get("multiplier")) != TYPE_FLOAT or typeof(option.get("title")) != TYPE_STRING or typeof(option.get("description")) != TYPE_STRING:
 				return false
-			if String(option["id"]) not in ["damage", "cadence", "range", "chain", "critical", "crit_power", "speed", "hull", "shield", "regen", "armor", "magnet", "siphon", "fortune", "repair", "salvage", "charge"]:
+			if String(option["id"]) not in ["damage", "cadence", "range", "chain", "critical", "crit_power", "speed", "hull", "force", "shield", "regen", "armor", "magnet", "siphon", "fortune", "repair", "salvage", "charge"]:
 				return false
 	return true
 
