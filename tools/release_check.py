@@ -9,6 +9,7 @@ project = (ROOT / "project.godot").read_text(encoding="utf-8")
 loader = (ROOT / "web" / "loading_theme.html").read_text(encoding="utf-8")
 export = (ROOT / "export_presets.cfg").read_text(encoding="utf-8")
 enemy = (ROOT / "scripts" / "enemy.gd").read_text(encoding="utf-8")
+player = (ROOT / "scripts" / "player.gd").read_text(encoding="utf-8")
 joystick = (ROOT / "scripts" / "virtual_joystick.gd").read_text(encoding="utf-8")
 version_file = (ROOT / "VERSION.txt").read_text(encoding="utf-8").strip()
 
@@ -39,7 +40,10 @@ checks = {
     "combat identities present": all(token in enemy for token in ["raider_hook", "blaster_double", "heavy_slam", "_neighbor_separation"]),
     "floating joystick follow present": "follow_threshold" in joystick and "follow_distance" in joystick,
     "removed active skills stay removed": all(token not in main for token in ["func _use_dash()", "func _use_surge()", "func _use_traction()", "SURCHARGE  •", "onde + dash"]),
-    "no live dash trigger": "trigger_dash(" not in main and 'is_action_just_pressed("dash")' not in main,
+    "no live dash trigger": "trigger_dash(" not in main and "trigger_dash(" not in player and 'is_action_just_pressed("dash")' not in main,
+    "dash visual runtime removed": "hero_dash" not in player and "dash_used" not in player,
+    "active shield vocabulary removed": "BOUCLIER" not in main and "restore_shield" not in main and "restore_shield" not in player,
+    "orphan dash art removed": not any((ROOT / "assets" / "hero" / name).exists() for name in ["hero_dash.png", "hero_dash_b.png", "hero_dash_c.png"]),
     "graveyard map orphan removed": not (ROOT / "assets" / "map" / "desert_world_v48_0.png").exists(),
 }
 
