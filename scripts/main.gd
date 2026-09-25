@@ -75,6 +75,12 @@ const BOSS_TEXTURES: Dictionary = {
 }
 const BOSS_KINDS: Array[String] = ["sentinel", "marauder", "archon", "warden", "reaper", "resonator", "scrap_titan"]
 const MINIBOSS_KINDS: Array[String] = ["phantom", "colossus", "veil_guardian", "leviathan_grinder"]
+const ALL_ENEMY_KINDS: Array[String] = [
+	"blaster", "raider", "stalker", "sniper", "suppressor", "breaker", "heavy",
+	"echo_scout", "veil_tech", "veil_guardian", "salvage_drone", "scrap_automaton",
+	"mobile_turret", "leviathan_grinder", "phantom", "colossus",
+	"sentinel", "marauder", "archon", "warden", "reaper", "resonator", "scrap_titan"
+]
 const BACKUP_MAX_BYTES: int = 4 * 1024 * 1024
 const WEB_BACKUP_PICKER_JS: String = """(function() {
   window.__nomadBackupStatus = '';
@@ -2235,7 +2241,7 @@ func _resume_saved_run() -> void:
 
 func _restore_enemy(data: Dictionary) -> void:
 	var kind: String = String(data.get("kind", ""))
-	if kind not in ["blaster", "raider", "stalker", "sniper", "suppressor", "breaker", "heavy", "echo_scout", "veil_tech", "veil_guardian", "salvage_drone", "scrap_automaton", "mobile_turret", "leviathan_grinder", "phantom", "colossus", "sentinel", "marauder", "archon", "warden", "reaper", "resonator", "scrap_titan"] or typeof(data.get("position")) != TYPE_VECTOR2:
+	if kind not in ALL_ENEMY_KINDS or typeof(data.get("position")) != TYPE_VECTOR2:
 		return
 	var enemy: NomadEnemy = EnemyScript.new() as NomadEnemy
 	enemy.setup(kind, 1.0, bool(data.get("elite", false)), String(data.get("affix", "")))
@@ -5521,7 +5527,7 @@ func _backup_config_is_valid(config: ConfigFile) -> bool:
 		for enemy: Variant in enemies:
 			if not enemy is Dictionary or typeof(enemy.get("position")) != TYPE_VECTOR2 or typeof(enemy.get("kind")) != TYPE_STRING:
 				return false
-			if String(enemy["kind"]) not in ["blaster", "raider", "stalker", "sniper", "suppressor", "breaker", "heavy", "echo_scout", "veil_tech", "veil_guardian", "salvage_drone", "scrap_automaton", "mobile_turret", "leviathan_grinder", "phantom", "colossus", "sentinel", "marauder", "archon", "warden", "reaper", "resonator", "scrap_titan"]:
+			if String(enemy["kind"]) not in ALL_ENEMY_KINDS:
 				return false
 			if typeof(enemy.get("elite")) != TYPE_BOOL or typeof(enemy.get("affix")) != TYPE_STRING:
 				return false
