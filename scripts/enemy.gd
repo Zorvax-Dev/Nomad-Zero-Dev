@@ -97,6 +97,8 @@ var _run_cycle: float = 0.0
 var _idle_cycle: float = 0.0
 var visual_quality: int = 2
 var _visual_redraw_cooldown: float = 0.0
+var _los_check_timer: float = 0.0
+var _los_cache_result: bool = true
 
 func setup(enemy_kind: String, difficulty: float, elite_mode: bool = false, enemy_affix: String = "") -> void:
 	kind = enemy_kind
@@ -373,6 +375,7 @@ func is_miniboss() -> bool:
 
 func _physics_process(delta: float) -> void:
 	_visual_redraw_cooldown = maxf(0.0, _visual_redraw_cooldown - delta)
+	_los_check_timer = maxf(0.0, _los_check_timer - delta)
 	if not active or not is_instance_valid(target):
 		return
 	attack_timer = maxf(0.0, attack_timer - delta)
@@ -1040,7 +1043,11 @@ func _finish_boss_attack() -> void:
 func _has_clear_shot() -> bool:
 	if world_nav == null or not is_instance_valid(target):
 		return true
-	return world_nav.has_walkable_line(global_position, target.global_position, 4.0)
+	if _los_check_timer <= 0.0:
+		_los_cache_result = world_nav.has_walkable_line(global_position, target.global_position, 4.0)
+		# Décalage déterministe entre ennemis : évite de recalculer toutes les lignes le même frame.
+		_los_check_timer = 0.11 + float(int(get_instance_id()) % 5) * 0.012
+	return _los_cache_result
 
 func _line_reposition_direction(to_target: Vector2) -> Vector2:
 	if to_target.length_squared() <= 0.001:
