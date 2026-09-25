@@ -2698,6 +2698,8 @@ func _zone_color(zone: String) -> Color:
 			return Color(0.88, 0.58, 0.38)
 		"CIMETIÈRE D’ÉPAVES":
 			return Color(0.63, 0.72, 0.74)
+		"DÉSERT OUVERT":
+			return Color(0.94, 0.76, 0.48)
 		_:
 			return Color(0.78, 0.80, 0.82)
 
@@ -2710,6 +2712,7 @@ func _zone_mood_color(zone: String) -> Color:
 		"PLAINE CENTRALE": return Color(0.26, 0.20, 0.34, 0.050)
 		"CANYON DES ÉCHOS": return Color(0.45, 0.24, 0.18, 0.060)
 		"CIMETIÈRE D’ÉPAVES": return Color(0.20, 0.24, 0.28, 0.072)
+		"DÉSERT OUVERT": return Color(0.43, 0.31, 0.16, 0.036)
 		_: return Color(0.0, 0.0, 0.0, 0.0)
 
 func _zone_banner_subtitle(zone: String) -> String:
@@ -2721,6 +2724,7 @@ func _zone_banner_subtitle(zone: String) -> String:
 		"PLAINE CENTRALE": return "terrain neutre • combat ouvert et fragments opportuns"
 		"CANYON DES ÉCHOS": return "goulet minéral • visée longue et traversées serrées"
 		"CIMETIÈRE D’ÉPAVES": return "acier brisé • hostiles mécaniques et lecture plus dense"
+		"DÉSERT OUVERT": return "sable libre • mobilité maximale et lignes de tir longues"
 		_: return ""
 
 func _zone_hint_text(zone: String) -> String:
@@ -2732,6 +2736,7 @@ func _zone_hint_text(zone: String) -> String:
 		"PLAINE CENTRALE": return "OPPORTUNITÉ • des fragments peuvent émerger sous pression"
 		"CANYON DES ÉCHOS": return "ALERTE • visibilité longue, attention aux percées à distance"
 		"CIMETIÈRE D’ÉPAVES": return "ALERTE • le secteur concentre drones, tourelles et automates"
+		"DÉSERT OUVERT": return "ESPACE OUVERT • utilise la mobilité pour casser les lignes de tir"
 		_: return ""
 
 func _show_zone_banner(zone: String) -> void:
