@@ -5521,11 +5521,17 @@ func _backup_config_is_valid(config: ConfigFile) -> bool:
 		for enemy: Variant in enemies:
 			if not enemy is Dictionary or typeof(enemy.get("position")) != TYPE_VECTOR2 or typeof(enemy.get("kind")) != TYPE_STRING:
 				return false
-			if String(enemy["kind"]) not in ["blaster", "raider", "stalker", "sniper", "suppressor", "breaker", "heavy", "phantom", "colossus", "sentinel", "marauder", "archon", "warden", "reaper"]:
+			if String(enemy["kind"]) not in ["blaster", "raider", "stalker", "sniper", "suppressor", "breaker", "heavy", "echo_scout", "veil_tech", "veil_guardian", "salvage_drone", "scrap_automaton", "mobile_turret", "leviathan_grinder", "phantom", "colossus", "sentinel", "marauder", "archon", "warden", "reaper", "resonator", "scrap_titan"]:
 				return false
 			if typeof(enemy.get("elite")) != TYPE_BOOL or typeof(enemy.get("affix")) != TYPE_STRING:
 				return false
 			for field: String in ENEMY_SAVE_PROPERTIES:
+				# Les timers comportementaux ont été ajoutés après les premiers checkpoints
+				# V49 : ils restent optionnels afin de ne jamais invalider une sauvegarde existante.
+				if not enemy.has(field):
+					if field in ["role_action_timer", "affix_action_timer", "exposed_timer"]:
+						continue
+					return false
 				var expected: int = TYPE_INT if field == "xp_value" else TYPE_FLOAT
 				if typeof(enemy.get(field)) != expected:
 					return false
