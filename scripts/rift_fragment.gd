@@ -23,9 +23,11 @@ func _physics_process(delta: float) -> void:
 		return
 	var to_player: Vector2 = player.global_position - global_position
 	var dist: float = to_player.length()
-	if dist < 240.0 or age > 3.0:
-		global_position += to_player.normalized() * speed * delta
-	if dist < 28.0:
+	if dist < 258.0 or age > 2.7:
+		var multiplier: float = 1.0 + clampf((258.0 - dist) / 258.0, 0.0, 1.0) * 0.80
+		if dist > 0.001:
+			global_position += to_player.normalized() * speed * multiplier * delta
+	if dist < 34.0:
 		queue_free()
 		collected.emit(value)
 	_queue_animated_redraw()
