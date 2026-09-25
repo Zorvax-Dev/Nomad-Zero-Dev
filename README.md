@@ -4,7 +4,7 @@ Dépôt privé de développement du projet Godot **NØMAD ZERO**.
 
 - **Stable / production** : `Zorvax-Dev/Nomad-Zero` — reste intact tant qu'une version n'est pas explicitement validée.
 - **Développement** : `Zorvax-Dev/Nomad-Zero-Dev` — sources Godot et futures versions.
-- **Base courante** : **V49.5 — Combat & exploration**.
+- **Base courante** : **V49.6 — Monde & collisions**.
 - **Godot** : 4.7.x.
 
 ## Organisation
@@ -40,3 +40,7 @@ Passe de cohérence technique et gameplay : suppression réelle des anciens syst
 ## V49.5
 
 Cette passe rend les combats et l’exploration moins mécaniques : les ennemis à distance cherchent désormais une vraie ligne de tir au lieu de tirer dans les décors, l’alerte hors écran privilégie la menace la plus dangereuse, les choix de niveau sont légèrement pondérés pour aider les synergies sans imposer un build, et les événements Embuscade / Corruption jusque-là dormants sont maintenant réellement intégrés aux vagues. Un directeur de composition évite aussi les groupes trop homogènes entre mêlée et distance, et l’écran de fin de run résume désormais modules, synergies et record de survie. Les vérifications de release couvrent ces comportements.
+
+## V49.6
+
+Passe visuelle et collision du monde : les landmarks utilisent désormais un vrai niveau de tri basé sur leur pied visuel afin que le héros passe derrière/devant au bon moment. Le Cimetière d’Épaves a été densifié uniquement avec les assets existants, avec des proportions revues et des empreintes de collision entièrement recalées sur les pixels visibles pour supprimer les grands murs invisibles. Le Canyon et l’Avant-poste ont aussi été légèrement rééquilibrés en échelle.
