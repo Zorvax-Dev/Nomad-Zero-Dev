@@ -2498,6 +2498,36 @@ func _active_enemy_count() -> int:
 			count += 1
 	return count
 
+func _active_enemy_kind_count(enemy_kind: String) -> int:
+	if enemies_root == null:
+		return 0
+	var count: int = 0
+	for node: Node in enemies_root.get_children():
+		var enemy: NomadEnemy = node as NomadEnemy
+		if enemy != null and enemy.active and not enemy.is_queued_for_deletion() and enemy.kind == enemy_kind:
+			count += 1
+	return count
+
+func _enemy_kind_soft_cap(enemy_kind: String) -> int:
+	match enemy_kind:
+		"sniper": return 2
+		"suppressor": return 3
+		"breaker": return 2
+		"heavy": return 2
+		"veil_tech": return 2
+		"stalker": return 4
+		"salvage_drone": return 4
+		"mobile_turret": return 2
+		"scrap_automaton": return 3
+		_: return 0
+
+func _fallback_enemy_kind() -> String:
+	match _player_zone():
+		"CIMETIÈRE D’ÉPAVES": return "salvage_drone"
+		"CANYON DES ÉCHOS": return "raider"
+		"RAFFINERIE": return "blaster"
+		_: return "raider" if rng.randf() < 0.46 else "blaster"
+
 # V44.48 — chaque ennemi consomme un budget de menace. Une vague peut donc
 # contenir beaucoup de cibles légères OU quelques menaces lourdes, sans saturer
 # l'écran avec les deux en même temps. Les boss ne rentrent pas dans ce budget.
@@ -3057,6 +3087,9 @@ func _spawn_enemy(force_kind: String = "", force_elite: bool = false, spawn_over
 						enemy_kind = "heavy"
 					elif roll < 0.62:
 						enemy_kind = "raider"
+		var soft_cap: int = _enemy_kind_soft_cap(enemy_kind)
+		if soft_cap > 0 and _active_enemy_kind_count(enemy_kind) >= soft_cap:
+			enemy_kind = _fallback_enemy_kind()
 	# Échelle séparée du nombre de KO : un bon joueur ne fait plus exploser la
 	# difficulté juste parce qu'il nettoie vite. La menace suit surtout la vague.
 	var wave_index: float = float(maxi(wave_number - 1, 0))
@@ -3515,11 +3548,20 @@ func _auto_force_wave() -> void:
 	if state != State.PLAYING or not is_instance_valid(player) or not player.can_pulse():
 		return
 	var auto_range_sq: float = player.force_wave_auto_range * player.force_wave_auto_range
+	var nearby_count: int = 0
+	var urgent_threat: bool = false
 	for node: Node in enemies_root.get_children():
 		var enemy: NomadEnemy = node as NomadEnemy
-		if enemy != null and enemy.active and player.global_position.distance_squared_to(enemy.global_position) <= auto_range_sq:
-			_use_pulse()
-			return
+		if enemy == null or not enemy.active:
+			continue
+		var distance_sq: float = player.global_position.distance_squared_to(enemy.global_position)
+		if distance_sq > auto_range_sq:
+			continue
+		nearby_count += 1
+		if enemy.elite or enemy.is_boss() or enemy.is_miniboss() or enemy.kind in ["heavy", "breaker", "scrap_automaton", "leviathan_grinder"] or distance_sq <= 92.0 * 92.0:
+			urgent_threat = true
+	if nearby_count >= 2 or urgent_threat:
+		_use_pulse()
 
 func _use_pulse() -> void:
 	if not _can_use_active_skill() or not player.trigger_pulse():
