@@ -61,8 +61,8 @@ const LEGACY_SAVE_PATH: String = "user://rift_nomad_stylized.cfg"
 const SAVE_VERSION: int = 9
 const RUN_SAVE_VERSION: int = 1
 const AUTOSAVE_INTERVAL: float = 12.0
-const APP_VERSION: String = "49.0.0"
-const BUILD_NAME: String = "V49.0 • OVERHAUL GLOBAL"
+const APP_VERSION: String = "49.1.0"
+const BUILD_NAME: String = "V49.1 • POLISH MONDE & LISIBILITÉ"
 const BOSS_CUTOUT: Shader = preload("res://assets/bosses/boss_cutout.gdshader")
 const BOSS_TEXTURES: Dictionary = {
 	"sentinel": preload("res://assets/bosses/sentinel_idle.png"),
@@ -315,7 +315,10 @@ var canyon_mastery: bool = false
 var overdrive_bar: ProgressBar
 var overdrive_label: Label
 var fragment_label: Label
+var zone_banner_panel: Panel
 var zone_banner_label: Label
+var zone_banner_subtitle_label: Label
+var zone_mood_overlay: ColorRect
 var rift_overlay: ColorRect
 const MAX_ACTIVE_ENEMIES: int = 18
 const MAX_ACTIVE_PROJECTILES: int = 40
@@ -874,6 +877,16 @@ func _layout_hud(space: Vector2, scale_value: float) -> void:
 	danger_label.position = Vector2(edge, space.y - 58.0)
 	danger_label.size = Vector2(minf(360.0, space.x * 0.34), 24.0)
 	danger_label.add_theme_font_size_override("font_size", maxi(12, ceili(9.5 / scale_value)))
+	if zone_banner_panel != null:
+		var banner_width: float = minf(520.0, maxf(260.0, space.x * 0.42))
+		zone_banner_panel.position = Vector2((space.x - banner_width) * 0.5, space.y - 148.0)
+		zone_banner_panel.size = Vector2(banner_width, 58.0)
+		zone_banner_label.position = Vector2(18.0, 8.0)
+		zone_banner_label.size = Vector2(banner_width - 36.0, 26.0)
+		zone_banner_label.add_theme_font_size_override("font_size", 16 if banner_width < 340.0 else 18)
+		zone_banner_subtitle_label.position = Vector2(18.0, 34.0)
+		zone_banner_subtitle_label.size = Vector2(banner_width - 36.0, 16.0)
+		zone_banner_subtitle_label.add_theme_font_size_override("font_size", 10 if banner_width < 340.0 else 11)
 	if threat_label != null:
 		var threat_width: float = minf(400.0, maxf(220.0, space.x * 0.34))
 		threat_label.position = Vector2((space.x - threat_width) * 0.5, space.y - 86.0)
@@ -1378,6 +1391,14 @@ func _build_hud() -> void:
 	hud.add_child(grade)
 	full_bleed_controls.append(grade)
 
+	zone_mood_overlay = ColorRect.new()
+	zone_mood_overlay.position = Vector2.ZERO
+	zone_mood_overlay.size = VIEW
+	zone_mood_overlay.color = Color(0.0, 0.0, 0.0, 0.0)
+	zone_mood_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(zone_mood_overlay)
+	full_bleed_controls.append(zone_mood_overlay)
+
 	hud_status = Panel.new()
 	hud_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud_status.add_theme_stylebox_override("panel", _style_panel(Color(0.016, 0.025, 0.031, 0.86), Color(0.31, 0.53, 0.56, 0.28), 15, 4))
@@ -1460,6 +1481,17 @@ func _build_hud() -> void:
 	danger_label.visible = false
 	hud.add_child(danger_label)
 
+	zone_banner_panel = Panel.new()
+	zone_banner_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	zone_banner_panel.visible = false
+	zone_banner_panel.modulate.a = 0.0
+	zone_banner_panel.add_theme_stylebox_override("panel", _style_panel(Color(0.014, 0.020, 0.028, 0.84), Color(0.75, 0.64, 0.45, 0.42), 18, 8))
+	hud.add_child(zone_banner_panel)
+	zone_banner_label = _make_label("", Vector2(18.0, 8.0), Vector2(484.0, 26.0), 18, Color("fff1d7"), HORIZONTAL_ALIGNMENT_CENTER)
+	zone_banner_panel.add_child(zone_banner_label)
+	zone_banner_subtitle_label = _make_label("", Vector2(18.0, 34.0), Vector2(484.0, 18.0), 11, Color("b7c7cb"), HORIZONTAL_ALIGNMENT_CENTER)
+	zone_banner_panel.add_child(zone_banner_subtitle_label)
+
 	# Les compétences tactiles restent retirées : le bas droit appartient au mouvement.
 	hud_pause_button = _make_button("Ⅱ", Vector2(1212.0, 12.0), Vector2(54.0, 50.0), false)
 	hud_pause_button.add_theme_font_size_override("font_size", 20)
@@ -1481,7 +1513,6 @@ func _build_hud() -> void:
 	hud.add_child(rift_overlay)
 	hud.move_child(rift_overlay, 0)
 	full_bleed_controls.append(rift_overlay)
-	zone_banner_label = null
 
 	joystick = JoystickScript.new() as NomadVirtualJoystick
 	joystick.position = Vector2.ZERO
@@ -2598,6 +2629,49 @@ func _zone_color(zone: String) -> Color:
 		_:
 			return Color(0.78, 0.80, 0.82)
 
+func _zone_mood_color(zone: String) -> Color:
+	match zone:
+		"CAMP NOMADE": return Color(0.30, 0.44, 0.34, 0.060)
+		"ÉPAVE DU PÈLERIN": return Color(0.48, 0.33, 0.16, 0.056)
+		"AVANT-POSTE": return Color(0.38, 0.30, 0.14, 0.048)
+		"RAFFINERIE": return Color(0.16, 0.33, 0.40, 0.058)
+		"PLAINE CENTRALE": return Color(0.26, 0.20, 0.34, 0.050)
+		"CANYON DES ÉCHOS": return Color(0.45, 0.24, 0.18, 0.060)
+		"CIMETIÈRE D’ÉPAVES": return Color(0.20, 0.24, 0.28, 0.072)
+		_: return Color(0.0, 0.0, 0.0, 0.0)
+
+func _zone_banner_subtitle(zone: String) -> String:
+	match zone:
+		"CAMP NOMADE": return "zone de répit • soins légers et récupération"
+		"ÉPAVE DU PÈLERIN": return "carcasse fracturée • couloirs de chasse et embuscades"
+		"AVANT-POSTE": return "lignes de tir courtes • pression frontale"
+		"RAFFINERIE": return "secteur industriel • feu nourri et silhouettes lourdes"
+		"PLAINE CENTRALE": return "terrain neutre • combat ouvert et fragments opportuns"
+		"CANYON DES ÉCHOS": return "goulet minéral • visée longue et traversées serrées"
+		"CIMETIÈRE D’ÉPAVES": return "acier brisé • hostiles mécaniques et lecture plus dense"
+		_: return ""
+
+func _zone_hint_text(zone: String) -> String:
+	match zone:
+		"CAMP NOMADE": return "APPUI LOCAL • le camp te soigne si la pression reste faible"
+		"ÉPAVE DU PÈLERIN": return "CONSEIL • garde du recul, les approches se ferment vite"
+		"AVANT-POSTE": return "CONSEIL • coupe les angles pour casser les lignes de tir"
+		"RAFFINERIE": return "ALERTE • présence accrue de profils lourds et suppressifs"
+		"PLAINE CENTRALE": return "OPPORTUNITÉ • des fragments peuvent émerger sous pression"
+		"CANYON DES ÉCHOS": return "ALERTE • visibilité longue, attention aux percées à distance"
+		"CIMETIÈRE D’ÉPAVES": return "ALERTE • le secteur concentre drones, tourelles et automates"
+		_: return ""
+
+func _show_zone_banner(zone: String) -> void:
+	if zone_banner_panel == null or zone_banner_label == null or zone_banner_subtitle_label == null or zone.is_empty():
+		return
+	zone_banner_panel.visible = true
+	zone_banner_label.text = zone
+	zone_banner_label.add_theme_color_override("font_color", _zone_color(zone).lightened(0.40))
+	zone_banner_subtitle_label.text = _zone_banner_subtitle(zone)
+	var accent: Color = _zone_color(zone)
+	zone_banner_panel.add_theme_stylebox_override("panel", _style_panel(Color(0.014, 0.020, 0.028, 0.84), Color(accent.r, accent.g, accent.b, 0.46), 18, 8))
+
 func _build_zone_objective_markers() -> void:
 	# Le marqueur de monde ne sert plus qu’aux événements du Rift.
 	mission_markers.clear()
@@ -2623,6 +2697,8 @@ func _objective_marker(key: String) -> NomadZoneObjectiveMarker:
 func _on_zone_changed(zone: String) -> void:
 	active_zone_name = zone
 	zone_stay_timer = 0.0
+	zone_banner_timer = 3.2
+	_show_zone_banner(zone)
 	match zone:
 		"CAMP NOMADE":
 			camp_support_timer = minf(camp_support_timer, 1.2)
@@ -2663,12 +2739,15 @@ func _update_zone_gameplay(delta: float) -> void:
 func _update_zone_status_text(zone: String) -> void:
 	if danger_label == null:
 		return
-	# V44.45 : la doctrine de zone n'occupe plus le HUD en permanence.
-	# Seul un événement actif mérite une seconde ligne d'information.
 	if dynamic_event_active:
 		danger_label.visible = true
 		danger_label.text = _dynamic_event_hud_text()
 		danger_label.add_theme_color_override("font_color", Color("d8b5ff"))
+	elif zone_stay_timer <= 5.0:
+		var hint: String = _zone_hint_text(zone)
+		danger_label.visible = not hint.is_empty()
+		danger_label.text = hint
+		danger_label.add_theme_color_override("font_color", _zone_color(zone).lightened(0.22))
 	else:
 		danger_label.visible = false
 		danger_label.text = ""
@@ -2812,6 +2891,50 @@ func _start_next_wave() -> void:
 	_show_toast("VAGUE %d  •  %s" % [wave_number, wave_message] if not wave_message.is_empty() else "VAGUE %d  •  %d s" % [wave_number, roundi(wave_duration)])
 	if wave_number % 5 == 0:
 		call_deferred("_spawn_wave_boss")
+
+func _enemy_spawn_spacing(enemy_kind: String) -> float:
+	if enemy_kind in BOSS_KINDS:
+		return 220.0
+	if enemy_kind in MINIBOSS_KINDS:
+		return 156.0
+	match enemy_kind:
+		"heavy", "breaker", "veil_guardian", "scrap_automaton", "mobile_turret", "leviathan_grinder": return 112.0
+		"stalker", "echo_scout", "salvage_drone": return 74.0
+		"sniper", "suppressor", "veil_tech": return 88.0
+		_: return 82.0
+
+func _spawn_position_score(candidate: Vector2, spacing_radius: float) -> float:
+	var min_distance: float = 99999.0
+	var nearby_count: int = 0
+	for node: Node in enemies_root.get_children():
+		var other: NomadEnemy = node as NomadEnemy
+		if other == null or not other.active or other.is_queued_for_deletion():
+			continue
+		var distance: float = candidate.distance_to(other.global_position)
+		min_distance = minf(min_distance, distance)
+		if distance < spacing_radius * 1.18:
+			nearby_count += 1
+	if min_distance > 90000.0:
+		min_distance = spacing_radius * 2.1
+	var player_distance: float = candidate.distance_to(player.global_position)
+	var distance_score: float = clampf(player_distance, 420.0, 860.0) * 0.06
+	return min_distance - float(nearby_count) * 36.0 + distance_score
+
+func _find_spawn_position(enemy_kind: String, spawn_radius: float, clearance_radius: float, min_open_ratio: float, spawn_override: Variant = null) -> Vector2:
+	if typeof(spawn_override) == TYPE_VECTOR2:
+		var override_position: Vector2 = spawn_override
+		return world.nearest_open_area(override_position, spawn_radius, clearance_radius, min_open_ratio, 460.0 if enemy_kind in BOSS_KINDS else 360.0)
+	var best_position: Vector2 = world.random_open_far(player.global_position, 420.0, 820.0, rng, spawn_radius, clearance_radius, min_open_ratio)
+	var best_score: float = -INF
+	var spacing_radius: float = _enemy_spawn_spacing(enemy_kind)
+	var attempts: int = 12 if adaptive_quality != QUALITY_LOW else 8
+	for _i: int in range(attempts):
+		var candidate: Vector2 = world.random_open_far(player.global_position, 420.0, 820.0, rng, spawn_radius, clearance_radius, min_open_ratio)
+		var score: float = _spawn_position_score(candidate, spacing_radius)
+		if score > best_score:
+			best_score = score
+			best_position = candidate
+	return best_position
 
 func _spawn_enemy(force_kind: String = "", force_elite: bool = false, spawn_override: Variant = null, forced_affix: String = "") -> NomadEnemy:
 	if not is_instance_valid(player):
@@ -2977,11 +3100,7 @@ func _spawn_enemy(force_kind: String = "", force_elite: bool = false, spawn_over
 		spawn_radius = 26.0
 		clearance_radius = 90.0
 		min_open_ratio = 0.68
-	if typeof(spawn_override) == TYPE_VECTOR2:
-		var override_position: Vector2 = spawn_override
-		enemy.global_position = world.nearest_open_area(override_position, spawn_radius, clearance_radius, min_open_ratio, 460.0 if enemy_kind in BOSS_KINDS else 360.0)
-	else:
-		enemy.global_position = world.random_open_far(player.global_position, 420.0, 820.0, rng, spawn_radius, clearance_radius, min_open_ratio)
+	enemy.global_position = _find_spawn_position(enemy_kind, spawn_radius, clearance_radius, min_open_ratio, spawn_override)
 	enemy.died.connect(_on_enemy_died)
 	enemy.request_shot.connect(_on_enemy_request_shot)
 	enemy.damaged.connect(_on_enemy_damaged)
@@ -5004,8 +5123,26 @@ func _on_rift_fragment_collected(value: int) -> void:
 	_play_sfx(SFX_XP, -11.0, 1.16, 1.24)
 	_save_profile()
 
-func _update_zone_banner(_delta: float) -> void:
-	return
+func _update_zone_banner(delta: float) -> void:
+	if zone_mood_overlay != null:
+		var target_color: Color = _zone_mood_color(_player_zone())
+		if dynamic_event_active:
+			target_color = target_color.lerp(Color(0.44, 0.20, 0.58, 0.10), 0.55)
+		zone_mood_overlay.color = zone_mood_overlay.color.lerp(target_color, minf(1.0, delta * 2.4))
+	if zone_banner_panel == null:
+		return
+	if zone_banner_timer <= 0.0:
+		zone_banner_panel.modulate.a = move_toward(zone_banner_panel.modulate.a, 0.0, delta * 2.8)
+		if zone_banner_panel.modulate.a <= 0.01:
+			zone_banner_panel.visible = false
+		return
+	zone_banner_panel.visible = true
+	var alpha: float = 1.0
+	if zone_banner_timer > 2.4:
+		alpha = clampf((3.2 - zone_banner_timer) / 0.8, 0.0, 1.0)
+	elif zone_banner_timer < 0.55:
+		alpha = clampf(zone_banner_timer / 0.55, 0.0, 1.0)
+	zone_banner_panel.modulate.a = move_toward(zone_banner_panel.modulate.a, alpha, delta * 4.5)
 
 func _flash_rift_overlay(custom_color: Color = Color(0.52, 0.20, 0.82, 0.22)) -> void:
 	if rift_overlay == null:
