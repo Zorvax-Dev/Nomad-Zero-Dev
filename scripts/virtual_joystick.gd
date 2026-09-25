@@ -8,6 +8,8 @@ var center: Vector2 = Vector2.ZERO
 var knob: Vector2 = Vector2.ZERO
 var radius: float = 84.0
 var deadzone: float = 0.11
+var follow_threshold: float = 1.48
+var follow_distance: float = 1.08
 var enabled: bool = false
 var blocked_controls: Array[Control] = []
 
@@ -48,6 +50,13 @@ func _touch_hits_button(position_in_viewport: Vector2) -> bool:
 func _update_vector(touch_position: Vector2) -> void:
 	var delta: Vector2 = touch_position - center
 	var distance: float = delta.length()
+	# Joystick flottant élastique : lors d'un long glissement, la base suit
+	# légèrement le doigt au lieu de forcer le pouce à rester autour du point initial.
+	if distance > radius * follow_threshold:
+		var follow_dir: Vector2 = delta.normalized()
+		center += follow_dir * (distance - radius * follow_distance)
+		delta = touch_position - center
+		distance = delta.length()
 	if distance <= radius * deadzone:
 		vector = Vector2.ZERO
 		knob = center + delta * 0.35
