@@ -20,3 +20,7 @@ Cette passe améliore le flow général du jeu : mouvement du héros, attraction
 ## V49.1
 
 Cette passe renforce l’identité des zones avec une ambiance visuelle légère, un bandeau d’entrée contextuel et des conseils temporaires. Les apparitions ennemies sont aussi mieux espacées pour limiter les regroupements brouillons sans réduire la pression des vagues.
+
+## Automatisation Web
+
+Chaque modification source poussée sur `main` est maintenant validée par Godot 4.7.2, exportée en Web/PWA et testée automatiquement. Si le build est valide, les fichiers `index*` générés sont remis à jour directement à la racine du dépôt. Les builds obsolètes sont annulés pour éviter qu’une ancienne version écrase une version plus récente.
