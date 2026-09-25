@@ -45,7 +45,6 @@ func _queue_animated_redraw() -> void:
 func _draw() -> void:
 	var color: Color = Color("65e58f")
 	if kind == "charge": color = Color("6edff4")
-	if kind == "shield": color = Color("63dcff")
 	var bob: float = sin(_phase) * 3.2
 	draw_circle(Vector2(0.0, bob), 19.0, Color(0.03, 0.05, 0.06, 0.72))
 	draw_circle(Vector2(0.0, bob), 14.0, color)
