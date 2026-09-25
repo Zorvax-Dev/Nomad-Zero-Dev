@@ -4,7 +4,7 @@ Dépôt privé de développement du projet Godot **NØMAD ZERO**.
 
 - **Stable / production** : `Zorvax-Dev/Nomad-Zero` — reste intact tant qu'une version n'est pas explicitement validée.
 - **Développement** : `Zorvax-Dev/Nomad-Zero-Dev` — sources Godot et futures versions.
-- **Base courante** : **V49.4 — Cohérence & stabilité**.
+- **Base courante** : **V49.5 — Combat & exploration**.
 - **Godot** : 4.7.x.
 
 ## Organisation
@@ -36,3 +36,7 @@ Cette passe donne une vraie signature de combat aux ennemis de base : Raider plu
 ## V49.4
 
 Passe de cohérence technique et gameplay : suppression réelle des anciens systèmes de dash, surcharge, traction et bouclier qui restaient en code mort, tout en gardant la compatibilité des anciennes sauvegardes. Les récompenses et objets concernés ont été reconvertis vers la mobilité normale, l’armure et l’onde de Force. Le registre des ennemis est centralisé et les contrôles CI vérifient désormais que ces systèmes retirés ne réapparaissent pas.
+
+## V49.5
+
+Cette passe rend les combats et l’exploration moins mécaniques : les ennemis à distance cherchent désormais une vraie ligne de tir au lieu de tirer dans les décors, l’alerte hors écran privilégie la menace la plus dangereuse, les choix de niveau sont légèrement pondérés pour aider les synergies sans imposer un build, et les événements Embuscade / Corruption jusque-là dormants sont maintenant réellement intégrés aux vagues. Les vérifications de release couvrent ces comportements.
