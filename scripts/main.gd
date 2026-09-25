@@ -1645,16 +1645,16 @@ func _make_upgrade_option(upgrade_id: String, rarity: String) -> Dictionary:
 			description = "+1 cible par frappe"
 		"critical":
 			title = "POINT FAIBLE"
-			description = "+%d %% chance critique" % roundi(3.5 * multiplier)
+			description = "+%d %% chance critique" % roundi(3.0 * multiplier)
 		"crit_power":
 			title = "EXÉCUTION"
-			description = "+%d %% puissance critique" % roundi(13.0 * multiplier)
+			description = "+%d %% puissance critique" % roundi(11.0 * multiplier)
 		"speed":
 			title = "PROPULSEURS"
 			description = "+%d %% vitesse de déplacement" % roundi(4.5 * multiplier)
 		"hull":
 			title = "RENFORT BIO"
-			var displayed_gain: float = minf(18.0 * multiplier, maxf(0.0, 560.0 - player.max_health)) if is_instance_valid(player) else 18.0 * multiplier
+			var displayed_gain: float = minf(16.0 * multiplier, maxf(0.0, 560.0 - player.max_health)) if is_instance_valid(player) else 16.0 * multiplier
 			description = "+%d PV max  •  soin immédiat" % roundi(displayed_gain)
 		"shield":
 			title = "ONDE DE FORCE"
@@ -1667,7 +1667,7 @@ func _make_upgrade_option(upgrade_id: String, rarity: String) -> Dictionary:
 			description = "+%.1f %% réduction des dégâts" % (1.10 * multiplier)
 		"magnet":
 			title = "CHAMP D’ATTRACTION"
-			description = "+%d aimant  •  EXP +%d %%" % [roundi(28.0 * multiplier), roundi(4.0 * multiplier)]
+			description = "+%d aimant  •  EXP +%d %%" % [roundi(28.0 * multiplier), roundi(3.2 * multiplier)]
 		"siphon":
 			title = "SIPHON VITAL"
 			description = "+%.1f PV par élimination" % (0.25 * multiplier)
@@ -2317,7 +2317,7 @@ func _spawn_player() -> void:
 	player.force_wave_radius += float(meta_health_rank) * 4.0
 	player.critical_chance = minf(0.24, player.critical_chance + float(meta_instinct_rank) * 0.008)
 	player.magnet_range += float(meta_instinct_rank) * 10.0
-	player.dash_cooldown = maxf(1.75, player.dash_cooldown * (1.0 - float(meta_instinct_rank) * 0.012))
+	player.speed *= 1.0 + float(meta_instinct_rank) * 0.004
 	# V44.37 : spécialisations permanentes de la Matrice.
 	player.critical_multiplier += float(meta_fury_rank) * 0.05
 	player.attack_interval = maxf(0.31, player.attack_interval * (1.0 - float(meta_fury_rank) * 0.012))
@@ -2337,7 +2337,7 @@ func _spawn_player() -> void:
 	if meta_archon_node:
 		player.pulse_cooldown = maxf(3.0, player.pulse_cooldown - 0.30)
 		player.magnet_range += 30.0
-		player.dash_cooldown = maxf(1.70, player.dash_cooldown * 0.92)
+		player.speed *= 1.035
 	_apply_canyon_profile_bonuses()
 	player.global_position = StylizedWorld.PLAYER_START
 	player.died.connect(_on_player_died)
