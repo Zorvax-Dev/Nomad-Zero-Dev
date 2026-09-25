@@ -4,7 +4,7 @@ Dépôt privé de développement du projet Godot **NØMAD ZERO**.
 
 - **Stable / production** : `Zorvax-Dev/Nomad-Zero` — reste intact tant qu'une version n'est pas explicitement validée.
 - **Développement** : `Zorvax-Dev/Nomad-Zero-Dev` — sources Godot et futures versions.
-- **Base courante** : **V49.2 — Combat lisibilité**.
+- **Base courante** : **V49.3 — Identités de combat**.
 - **Godot** : 4.7.x.
 
 ## Organisation
@@ -28,3 +28,7 @@ Chaque modification source poussée sur `main` est maintenant validée par Godot
 ## V49.2
 
 Cette passe réduit les paquets d’ennemis en ajoutant une séparation locale pendant leurs déplacements et une légère correction même lorsqu’ils sont au contact. Les gros profils conservent davantage d’espace autour d’eux, ce qui améliore la lecture des silhouettes et des télégraphes sans réduire la pression du combat.
+
+## V49.3
+
+Cette passe donne une vraie signature de combat aux ennemis de base : Raider plus mobile, Blaster à double tir télégraphié et Lourd à frappe de zone. Les groupes sont mieux composés et désynchronisés, l’onde automatique se déclenche de façon plus intelligente, le joystick flottant suit les longs glissements, les anciens contrôles de dash ont été neutralisés et la compatibilité des sauvegardes a été renforcée pour tous les types d’ennemis actuels.
