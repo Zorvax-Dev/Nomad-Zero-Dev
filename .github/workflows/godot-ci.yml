@@ -103,4 +103,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "build(web): refresh V$(cat VERSION.txt) [skip ci]"
-          git push
+          # Une modification source peut arriver entre le contrôle ci-dessus et ce push.
+          # Dans ce cas le prochain workflow produira le bon build : ce run ne doit pas
+          # être marqué en échec pour un simple conflit de course.
+          if ! git push; then
+            echo "A newer commit won the race; skipping this stale Web refresh."
+            exit 0
+          fi
