@@ -653,6 +653,8 @@ func _physics_process(delta: float) -> void:
 			elif attack_timer <= 0.0:
 				attack_timer = 1.28 / attack_speed_multiplier
 				request_shot.emit(self, target)
+	if not moving and not is_boss():
+		moving = _apply_passive_crowd_separation(delta)
 	if moving:
 		_animate_run(delta, to_target.x)
 	else:
@@ -966,10 +968,62 @@ func _finish_boss_attack() -> void:
 	if kind != "archon":
 		windup_direction = Vector2.ZERO
 
+func _crowd_radius() -> float:
+	if is_boss():
+		return 112.0
+	if is_miniboss():
+		return 92.0
+	if kind in ["heavy", "breaker", "scrap_automaton", "mobile_turret"]:
+		return 78.0
+	if kind in ["stalker", "echo_scout", "salvage_drone"]:
+		return 66.0
+	return 62.0
+
+func _neighbor_separation() -> Vector2:
+	var root: Node = get_parent()
+	if root == null:
+		return Vector2.ZERO
+	var own_radius: float = _crowd_radius()
+	var force: Vector2 = Vector2.ZERO
+	for node: Node in root.get_children():
+		var other: NomadEnemy = node as NomadEnemy
+		if other == null or other == self or not other.active or other.is_queued_for_deletion():
+			continue
+		var delta_to_self: Vector2 = global_position - other.global_position
+		var combined_radius: float = (own_radius + other._crowd_radius()) * 0.5
+		var distance_sq: float = delta_to_self.length_squared()
+		if distance_sq >= combined_radius * combined_radius:
+			continue
+		if distance_sq <= 0.001:
+			var side: float = -1.0 if get_instance_id() < other.get_instance_id() else 1.0
+			var angle: float = float(int(get_instance_id()) % 7) * 0.73
+			force += Vector2(side, 0.0).rotated(angle)
+			continue
+		var distance: float = sqrt(distance_sq)
+		var pressure: float = 1.0 - distance / combined_radius
+		force += delta_to_self / distance * pressure * pressure
+	return force.limit_length(1.0)
+
+func _apply_passive_crowd_separation(delta: float) -> bool:
+	var separation: Vector2 = _neighbor_separation()
+	if separation.length_squared() <= 0.0025:
+		return false
+	var crowd_speed: float = speed * (0.34 if is_miniboss() else 0.42)
+	var desired: Vector2 = global_position + separation * crowd_speed * delta
+	var radius: float = 29.0 if kind in ["colossus", "veil_guardian", "leviathan_grinder"] else (24.0 if kind in ["heavy", "breaker", "scrap_automaton", "mobile_turret"] else 20.0)
+	var resolved: Vector2 = world_nav.resolve_motion(global_position, desired, radius) if world_nav != null else desired
+	var moved: bool = global_position.distance_squared_to(resolved) > 0.09
+	global_position = resolved
+	return moved
+
 func _move_dir(direction: Vector2, delta: float) -> void:
 	var move_dir: Vector2 = direction.normalized()
 	if move_dir.length_squared() <= 0.001:
 		return
+	var separation: Vector2 = _neighbor_separation()
+	if separation.length_squared() > 0.0025:
+		var separation_weight: float = 0.26 if is_boss() else (0.34 if is_miniboss() else 0.46)
+		move_dir = (move_dir + separation * separation_weight).normalized()
 	var radius: float = 29.0 if kind in ["colossus", "veil_guardian", "leviathan_grinder"] else (24.0 if kind in ["heavy", "breaker", "scrap_automaton", "mobile_turret"] or is_boss() else 20.0)
 	if world_nav == null:
 		global_position += move_dir * speed * delta
