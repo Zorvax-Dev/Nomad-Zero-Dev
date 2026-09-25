@@ -1247,7 +1247,7 @@ func _update_boss_dossier() -> void:
 		"sentinel": {"wave": "VAGUE 5", "one": "I  •  ÉVENTAIL / TIR PRÉCIS", "two": "II  •  RAILS PARALLÈLES", "tip": "Ses lignes violettes s'arrêtent aux obstacles. Change de couloir.", "reward": "SABRE  +8 DE PORTÉE"},
 		"marauder": {"wave": "VAGUE 10", "one": "I  •  IMPACT / CHARGE", "two": "II  •  ENTAILLE CROISÉE", "tip": "Sa percée s'arrête aux obstacles. Évite la trace orange et riposte.", "reward": "DÉGÂTS  +5,5 %"},
 		"archon": {"wave": "VAGUE 15", "one": "I  •  RAYON / TROIS ZONES", "two": "II  •  ANNEAU", "tip": "Ses failles verrouillent ta position : quitte les cercles verts.", "reward": "ONDE  RECHARGE -0,22 s"},
-		"warden": {"wave": "VAGUE 20", "one": "I  •  GRILLE / SALVE", "two": "II  •  CAGE NULL", "tip": "Lis les trois rails cyan puis coupe leur axe. Sa cage punit les déplacements tardifs.", "reward": "BOUCLIER +18"},
+		"warden": {"wave": "VAGUE 20", "one": "I  •  GRILLE / SALVE", "two": "II  •  CAGE NULL", "tip": "Lis les trois rails cyan puis coupe leur axe. Sa cage punit les déplacements tardifs.", "reward": "ARMURE +1,2 %  •  ONDE PRÊTE"},
 		"reaper": {"wave": "VAGUE 25", "one": "I  •  BOND / FAUCHE", "two": "II  •  ONDE DE CENDRE", "tip": "Ne reste pas à mi-distance : son anneau frappe entre deux zones sûres.", "reward": "CADENCE +4 %"},
 		"resonator": {"wave": "CANYON • VAGUES 10/20/30…", "one": "I  •  LIGNES D'ÉCHO / DOUBLE PULSATION", "two": "II  •  EFFONDREMENT RÉSONANT", "tip": "Ses attaques exploitent les couloirs du Canyon. Change de ligne tôt et garde un passage de fuite.", "reward": "ONDE + PORTÉE / RELIQUE ÉCHO"},
 		"scrap_titan": {"wave": "CIMETIÈRE • VAGUES 10/20/30…", "one": "I  •  RAILS MAGNÉTIQUES / SALVE DE DÉBRIS", "two": "II  •  ANNEAU BROYEUR", "tip": "Ses rails occupent les allées métalliques. Coupe tôt leur axe et évite la mi-distance en phase II.", "reward": "ARMURE / CŒUR DU TITAN"}
@@ -1815,7 +1815,7 @@ func _apply_level_upgrade(option: Dictionary) -> void:
 			player.force_wave_radius += 14.0 * multiplier
 			player.force_wave_damage_scale += 0.05 * multiplier
 			player.force_wave_auto_range += 10.0 * multiplier
-			player.restore_shield(18.0 * multiplier)
+			player.restore_force(18.0 * multiplier)
 		"regen":
 			player.regeneration = minf(1.6, player.regeneration + 0.07 * multiplier)
 		"armor":
@@ -1835,7 +1835,7 @@ func _apply_level_upgrade(option: Dictionary) -> void:
 		"charge":
 			player.pulse_timer = 0.0
 	player.heal(minf(16.0, player.max_health * 0.025))
-	player.restore_shield(8.0)
+	player.restore_force(8.0)
 	_check_run_synergies()
 	_limit_survival_stats()
 	_show_toast("%s  •  %s" % [_rarity_label(rarity), String(option["title"])])
@@ -2719,7 +2719,7 @@ func _update_zone_gameplay(delta: float) -> void:
 		var nearby_threats: int = _count_nearby_enemies(player.global_position, 300.0)
 		if wave_number < 8 or nearby_threats == 0:
 			player.heal(minf(8.0, maxf(4.0, player.max_health * 0.015)))
-			player.restore_shield(5.0)
+			player.restore_force(5.0)
 		if player.health < player.max_health * 0.55 and rng.randf() < 0.16 and nearby_threats <= 2:
 			_spawn_supply(player.global_position + Vector2(rng.randf_range(-55.0, 55.0), rng.randf_range(-30.0, 48.0)), "med")
 	elif zone == "PLAINE CENTRALE" and central_supply_timer <= 0.0 and zone_stay_timer >= 8.0 and _active_enemy_count() >= 4 and rng.randf() < delta * 0.45:
@@ -2757,7 +2757,7 @@ func _update_wave(delta: float) -> void:
 			if wave_intermission < 0.0:
 				wave_intermission = 4.0
 				player.heal(minf(18.0, player.max_health * 0.035))
-				player.restore_shield(10.0)
+				player.restore_force(10.0)
 				_show_toast("VAGUE %d TERMINÉE  •  RÉPIT" % wave_number)
 				_haptic(24, 0.30, 0.18)
 			else:
@@ -3357,10 +3357,11 @@ func _grant_boss_reward(boss_kind: String) -> String:
 				player.pulse_timer = 0.0
 				reward = "ONDE -%.2f s" % (before_cooldown - player.pulse_cooldown)
 		"warden":
-			if player.max_shield < 249.0:
-				player.max_shield = minf(250.0, player.max_shield + 18.0)
-				player.shield = minf(player.max_shield, player.shield + 18.0)
-				reward = "BOUCLIER +18"
+			if player.armor < 0.315 or player.pulse_cooldown > 2.61:
+				player.armor = minf(0.32, player.armor + 0.012)
+				player.pulse_cooldown = maxf(2.6, player.pulse_cooldown - 0.10)
+				player.pulse_timer = 0.0
+				reward = "ARMURE +1,2 %  •  ONDE PRÊTE"
 		"reaper":
 			if player.attack_interval > 0.225:
 				var before_interval: float = player.attack_interval
@@ -3495,7 +3496,7 @@ func _level_up() -> void:
 	xp_needed = 30 + (level - 1) * 16 + maxi(0, level - 10) * 4
 	pending_level_choices += 1
 	player.heal(minf(20.0, player.max_health * 0.045))
-	player.restore_shield(12.0)
+	player.restore_force(12.0)
 	_play_sfx(SFX_LEVEL, -8.0, 1.0, 1.0)
 	_shake(3.5, 0.13)
 	_spawn_pulse_fx(Color(1.0, 0.78, 0.32, 0.82), 1.55, 0.42)
@@ -3772,10 +3773,11 @@ func _apply_loot_module(module_id: String) -> void:
 			player.force_wave_damage_scale += 0.22
 			player.pulse_timer = 0.0
 		"warden_lattice":
-			player.max_shield += 38.0
-			player.shield += 38.0
-			player.shield_regeneration += 0.16
-			player.armor += 0.025
+			player.max_health += 24.0
+			player.health += 24.0
+			player.armor += 0.035
+			player.pulse_cooldown = maxf(2.6, player.pulse_cooldown - 0.16)
+			player.pulse_timer = 0.0
 		"reaper_scythe":
 			player.damage *= 1.12
 			player.attack_interval = maxf(0.24, player.attack_interval * 0.92)
@@ -3791,9 +3793,9 @@ func _apply_loot_module(module_id: String) -> void:
 			player.health += 10.0
 			player.armor += 0.010
 		"induction_cell":
-			player.pulse_cooldown = maxf(2.6, player.pulse_cooldown - 0.18)
-			player.max_shield += 10.0
-			player.shield += 10.0
+			player.pulse_cooldown = maxf(2.6, player.pulse_cooldown - 0.28)
+			player.force_wave_radius += 10.0
+			player.pulse_timer = maxf(0.0, player.pulse_timer - 1.4)
 		"salvage_actuator":
 			player.speed += 9.0
 			player.attack_interval = maxf(0.22, player.attack_interval * 0.965)
@@ -3803,8 +3805,8 @@ func _apply_loot_module(module_id: String) -> void:
 			player.regeneration += 0.12
 			player.magnet_range += 20.0
 		"titan_salvage_core":
-			player.max_shield += 28.0
-			player.shield += 28.0
+			player.max_health += 18.0
+			player.health += 18.0
 			player.armor += 0.025
 			player.magnet_range += 26.0
 	_check_run_synergies()
@@ -3840,7 +3842,7 @@ func _spawn_supply(position_value: Vector2, supply_kind: String, age_value: floa
 	var supply: NomadSupplyPickup = SupplyScript.new() as NomadSupplyPickup
 	supply.global_position = _safe_pickup_position(position_value, 18.0)
 	supply.player = player
-	supply.kind = supply_kind
+	supply.kind = "charge" if supply_kind == "shield" else supply_kind
 	supply.age = age_value
 	supply.collected.connect(_on_supply_collected)
 	pickups_root.add_child(supply)
@@ -3852,12 +3854,9 @@ func _on_supply_collected(kind: String) -> void:
 		"med":
 			player.heal(minf(52.0, maxf(26.0, player.max_health * 0.13)))
 			_show_toast("MÉDIPACK  •  INTÉGRITÉ RESTAURÉE")
-		"shield":
-			player.restore_shield(26.0)
-			_show_toast("CELLULE DE FORCE  •  ONDE ACCÉLÉRÉE")
 		_:
 			player.pulse_timer = maxf(0.0, player.pulse_timer - 3.8)
-			_show_toast("CELLULE D'ÉNERGIE  •  ONDE ACCÉLÉRÉE")
+			_show_toast("CELLULE DE FORCE  •  ONDE ACCÉLÉRÉE")
 	_play_sfx(SFX_XP, -14.0, 1.10, 1.18)
 
 func _dynamic_event_name(kind: String) -> String:
