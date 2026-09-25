@@ -5296,7 +5296,9 @@ func _on_player_died() -> void:
 	_save_profile()
 	var minutes: int = floori(run_time / 60.0)
 	var seconds: int = int(run_time) % 60
-	game_over_stats.text = "NIVEAU %d   •   %d KO   •   %d ÉLITES\nSURVIE %02d:%02d   •   +%d FRAGMENTS\n\nRECORD  %d KO   •   NIV. %d" % [level, kills, elites_killed, minutes, seconds, run_fragments, best_kills, best_level]
+	var best_minutes: int = floori(best_time / 60.0)
+	var best_seconds: int = int(best_time) % 60
+	game_over_stats.text = "NIVEAU %d   •   %d KO   •   %d ÉLITES\nSURVIE %02d:%02d   •   +%d FRAGMENTS\n%d MODULES   •   %d SYNERGIES\nRECORD  %d KO   •   NIV. %d   •   %02d:%02d" % [level, kills, elites_killed, minutes, seconds, run_fragments, run_module_count, run_synergies.size(), best_kills, best_level, best_minutes, best_seconds]
 	_shake(8.0, 0.24)
 
 func _cancel_pending_backup() -> void:
