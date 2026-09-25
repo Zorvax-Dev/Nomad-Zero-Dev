@@ -10,6 +10,7 @@ loader = (ROOT / "web" / "loading_theme.html").read_text(encoding="utf-8")
 export = (ROOT / "export_presets.cfg").read_text(encoding="utf-8")
 enemy = (ROOT / "scripts" / "enemy.gd").read_text(encoding="utf-8")
 player = (ROOT / "scripts" / "player.gd").read_text(encoding="utf-8")
+world = (ROOT / "scripts" / "world.gd").read_text(encoding="utf-8")
 joystick = (ROOT / "scripts" / "virtual_joystick.gd").read_text(encoding="utf-8")
 version_file = (ROOT / "VERSION.txt").read_text(encoding="utf-8").strip()
 
@@ -44,6 +45,9 @@ checks = {
     "combat role director present": all(token in main for token in ["_active_ranged_enemy_count", "_zone_melee_fallback", "_zone_ranged_fallback"]),
     "full world-event variety active": all(token in main for token in ['pool.append("ambush")', 'pool.append("corruption")', '"corruption":', '"ambush":']),
     "end-of-run build summary present": "run_synergies.size()" in main and "run_module_count" in main and "best_minutes" in main,
+    "decor depth sorting present": "_decor_sort_offset" in world and "spr.z_index = int(pos.y + _decor_sort_offset" in world,
+    "graveyard density pass present": all(token in world for token in ["ScrapHeapWest", "ScrapHeapNorth", "0.62, false", "0.60, false"]),
+    "graveyard footprint recalibration present": "larges murs invisibles" in world and "Vector2(2140.0, 2765.0)" in world,
     "floating joystick follow present": "follow_threshold" in joystick and "follow_distance" in joystick,
     "removed active skills stay removed": all(token not in main for token in ["func _use_dash()", "func _use_surge()", "func _use_traction()", "SURCHARGE  •", "onde + dash"]),
     "no live dash trigger": "trigger_dash(" not in main and "trigger_dash(" not in player and 'is_action_just_pressed("dash")' not in main,
