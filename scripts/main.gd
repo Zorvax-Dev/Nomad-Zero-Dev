@@ -2561,6 +2561,30 @@ func _enemy_kind_soft_cap(enemy_kind: String) -> int:
 		"scrap_automaton": return 3
 		_: return 0
 
+func _is_ranged_enemy_kind(enemy_kind: String) -> bool:
+	return enemy_kind in ["blaster", "sniper", "suppressor", "veil_tech", "salvage_drone", "mobile_turret", "phantom"]
+
+func _active_ranged_enemy_count() -> int:
+	var count: int = 0
+	for node: Node in enemies_root.get_children():
+		var enemy: NomadEnemy = node as NomadEnemy
+		if enemy != null and enemy.active and not enemy.is_queued_for_deletion() and _is_ranged_enemy_kind(enemy.kind):
+			count += 1
+	return count
+
+func _zone_melee_fallback() -> String:
+	match _player_zone():
+		"CIMETIÈRE D’ÉPAVES": return "scrap_automaton"
+		"CANYON DES ÉCHOS": return "stalker"
+		"RAFFINERIE": return "heavy" if _active_enemy_kind_count("heavy") < 2 else "raider"
+		_: return "raider"
+
+func _zone_ranged_fallback() -> String:
+	match _player_zone():
+		"CIMETIÈRE D’ÉPAVES": return "salvage_drone"
+		"CANYON DES ÉCHOS": return "veil_tech"
+		_: return "blaster"
+
 func _fallback_enemy_kind() -> String:
 	match _player_zone():
 		"CIMETIÈRE D’ÉPAVES": return "salvage_drone"
@@ -3109,6 +3133,14 @@ func _spawn_enemy(force_kind: String = "", force_elite: bool = false, spawn_over
 		var soft_cap: int = _enemy_kind_soft_cap(enemy_kind)
 		if soft_cap > 0 and _active_enemy_kind_count(enemy_kind) >= soft_cap:
 			enemy_kind = _fallback_enemy_kind()
+		var active_count: int = _active_enemy_count()
+		var ranged_count: int = _active_ranged_enemy_count()
+		# Directeur de composition léger : évite les murs de projectiles ou,
+		# inversement, les gros paquets sans aucune pression à distance.
+		if active_count >= 6 and _is_ranged_enemy_kind(enemy_kind) and ranged_count >= ceili(float(active_count) * 0.56):
+			enemy_kind = _zone_melee_fallback()
+		elif active_count >= 5 and not _is_ranged_enemy_kind(enemy_kind) and ranged_count == 0 and rng.randf() < 0.58:
+			enemy_kind = _zone_ranged_fallback()
 	# Échelle séparée du nombre de KO : un bon joueur ne fait plus exploser la
 	# difficulté juste parce qu'il nettoie vite. La menace suit surtout la vague.
 	var wave_index: float = float(maxi(wave_number - 1, 0))
