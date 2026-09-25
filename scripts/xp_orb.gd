@@ -29,10 +29,11 @@ func _physics_process(delta: float) -> void:
 		return
 	var to_player: Vector2 = player.global_position - global_position
 	var dist: float = to_player.length()
-	var attraction: float = player.magnet_range if player != null else 185.0
-	if dist < attraction or age > 4.2:
-		var multiplier: float = 1.0 + clampf((attraction - dist) / maxf(1.0, attraction), 0.0, 1.0) * 0.65
-		global_position += to_player.normalized() * speed * multiplier * delta
-	if dist < 25.0:
+	var attraction: float = player.magnet_range + 14.0 if player != null else 199.0
+	if dist < attraction * 1.08 or age > 3.6:
+		var multiplier: float = 1.0 + clampf((attraction - dist) / maxf(1.0, attraction), 0.0, 1.0) * 0.95
+		if dist > 0.001:
+			global_position += to_player.normalized() * speed * multiplier * delta
+	if dist < 34.0:
 		queue_free()
 		collected.emit(value)
