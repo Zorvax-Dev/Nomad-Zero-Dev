@@ -46,9 +46,11 @@ func _physics_process(delta: float) -> void:
 	var to_player: Vector2 = player.global_position - global_position
 	var dist: float = to_player.length()
 	var attraction: float = maxf(175.0, player.magnet_range * 0.92)
-	if dist < attraction or age > 8.0:
-		global_position += to_player.normalized() * speed * delta
-	if dist < 30.0:
+	if dist < attraction * 1.04 or age > 6.5:
+		var multiplier: float = 1.0 + clampf((attraction - dist) / maxf(1.0, attraction), 0.0, 1.0) * 0.72
+		if dist > 0.001:
+			global_position += to_player.normalized() * speed * multiplier * delta
+	if dist < 36.0:
 		queue_free()
 		collected.emit(module_id, rarity)
 	_queue_animated_redraw()
