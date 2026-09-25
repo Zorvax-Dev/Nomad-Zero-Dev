@@ -14,4 +14,4 @@
 ## Version
 - Sources Godot : 49.1.0.
 - Cette modification concerne le dépôt de développement uniquement.
-- Le build Web/PWA compilé doit être régénéré depuis Godot pour inclure les changements de gameplay.
+- Le build Web/PWA est désormais validé, exporté et remis à jour automatiquement par GitHub Actions après les changements de source sur `main`.
