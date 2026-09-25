@@ -196,7 +196,6 @@ var time_label: Label
 var zone_label: Label
 var danger_label: Label
 # V44.42 — touches actives tactiles. Le joystick réserve tout le bloc.
-var force_status_label: Label
 var event_label: Label
 var boss_bar: ProgressBar
 var boss_label: Label
@@ -1424,7 +1423,6 @@ func _build_hud() -> void:
 	xp_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud_status.add_child(xp_label)
 
-	force_status_label = null
 
 	hud_wave_panel = Panel.new()
 	hud_wave_panel.add_theme_stylebox_override("panel", _style_panel(Color(0.020, 0.029, 0.036, 0.88), Color(0.43, 0.48, 0.55, 0.36), 14, 4))
@@ -2480,7 +2478,10 @@ func _update_game(delta: float) -> void:
 			event_timer = 999.0
 		elif dynamic_event_active:
 			event_timer = 999.0
-		elif wave_number >= 4 and wave_number % 2 == 0 and wave_number % 5 != 0:
+		elif wave_number >= 4 and wave_number % 5 != 0:
+			# Le tirage de event_timer décide déjà si cette vague reçoit un événement.
+			# L'ancien filtre "vague paire" annulait silencieusement près de la moitié
+			# des événements pourtant planifiés.
 			_start_dynamic_world_event()
 			event_timer = 999.0
 		else:
