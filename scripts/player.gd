@@ -27,7 +27,7 @@ const GROUND_SHADOW: Texture2D = preload("res://assets/effects/ground_shadow.png
 
 var world_nav: StylizedWorld
 var touch_vector: Vector2 = Vector2.ZERO
-var speed: float = 292.0
+var speed: float = 296.0
 var max_health: float = 150.0
 var health: float = 150.0
 var max_shield: float = 0.0
@@ -45,7 +45,7 @@ var dash_timer: float = 0.0
 var armor: float = 0.05
 var regeneration: float = 0.35
 var shield_regeneration: float = 0.0
-var magnet_range: float = 235.0
+var magnet_range: float = 248.0
 var critical_chance: float = 0.08
 var critical_multiplier: float = 1.80
 var multishot_count: int = 1
@@ -117,8 +117,10 @@ func _physics_process(delta: float) -> void:
 		target_velocity = input_dir * speed * input_strength
 		_sprite.flip_h = input_dir.x < -0.05
 	var reversing: bool = target_velocity.length_squared() > 0.0 and _move_velocity.length_squared() > 100.0 and target_velocity.dot(_move_velocity) < 0.0
-	var acceleration: float = 4300.0 if reversing else (3000.0 if target_velocity.length_squared() > 0.0 else 3900.0)
+	var acceleration: float = 4450.0 if reversing else (3140.0 if target_velocity.length_squared() > 0.0 else 4200.0)
 	_move_velocity = _move_velocity.move_toward(target_velocity, acceleration * delta)
+	if target_velocity.length_squared() <= 0.0 and _move_velocity.length_squared() < 18.0:
+		_move_velocity = Vector2.ZERO
 	var total_velocity: Vector2 = _move_velocity + _dash_velocity
 	if total_velocity.length_squared() > 0.1:
 		var desired: Vector2 = global_position + total_velocity * delta
