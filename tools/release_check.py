@@ -8,6 +8,8 @@ main = (ROOT / "scripts" / "main.gd").read_text(encoding="utf-8")
 project = (ROOT / "project.godot").read_text(encoding="utf-8")
 loader = (ROOT / "web" / "loading_theme.html").read_text(encoding="utf-8")
 export = (ROOT / "export_presets.cfg").read_text(encoding="utf-8")
+enemy = (ROOT / "scripts" / "enemy.gd").read_text(encoding="utf-8")
+joystick = (ROOT / "scripts" / "virtual_joystick.gd").read_text(encoding="utf-8")
 version_file = (ROOT / "VERSION.txt").read_text(encoding="utf-8").strip()
 
 app_match = re.search(r'const APP_VERSION: String = "([^"]+)"', main)
@@ -33,6 +35,11 @@ checks = {
     "embedded export loader carries current release": f"V{'.'.join(app_version.split('.')[:2])} // " in export if app_version else False,
     "release notes present": release_notes.exists(),
     "pickup QoL helper": "_count_nearby_supplies" in main and "_request_emergency_support" in main,
+    "enemy registry centralized": "const ALL_ENEMY_KINDS" in main and main.count("ALL_ENEMY_KINDS") >= 3,
+    "combat identities present": all(token in enemy for token in ["raider_hook", "blaster_double", "heavy_slam", "_neighbor_separation"]),
+    "floating joystick follow present": "follow_threshold" in joystick and "follow_distance" in joystick,
+    "removed active skills stay removed": all(token not in main for token in ["func _use_dash()", "func _use_surge()", "func _use_traction()", "SURCHARGE  •", "onde + dash"]),
+    "no live dash trigger": "trigger_dash(" not in main and 'is_action_just_pressed("dash")' not in main,
     "graveyard map orphan removed": not (ROOT / "assets" / "map" / "desert_world_v48_0.png").exists(),
 }
 
