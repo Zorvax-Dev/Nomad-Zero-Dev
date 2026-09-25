@@ -61,8 +61,8 @@ const LEGACY_SAVE_PATH: String = "user://rift_nomad_stylized.cfg"
 const SAVE_VERSION: int = 9
 const RUN_SAVE_VERSION: int = 1
 const AUTOSAVE_INTERVAL: float = 12.0
-const APP_VERSION: String = "49.2.0"
-const BUILD_NAME: String = "V49.2 • COMBAT LISIBILITÉ"
+const APP_VERSION: String = "49.3.0"
+const BUILD_NAME: String = "V49.3 • IDENTITÉS DE COMBAT"
 const BOSS_CUTOUT: Shader = preload("res://assets/bosses/boss_cutout.gdshader")
 const BOSS_TEXTURES: Dictionary = {
 	"sentinel": preload("res://assets/bosses/sentinel_idle.png"),
@@ -1938,7 +1938,7 @@ func _build_pause() -> void:
 	var menu_button: Button = _make_button("MENU PRINCIPAL", Vector2(62.0, 286.0), Vector2(376.0, 56.0), false)
 	menu_button.pressed.connect(_menu_from_pause)
 	card.add_child(menu_button)
-	card.add_child(_make_label("ÉCHAP  •  REPRENDRE     |     V49.2", Vector2(0.0, 375.0), Vector2(500.0, 22.0), 11, Color("87999e"), HORIZONTAL_ALIGNMENT_CENTER))
+	card.add_child(_make_label("ÉCHAP  •  REPRENDRE     |     V49.3", Vector2(0.0, 375.0), Vector2(500.0, 22.0), 11, Color("87999e"), HORIZONTAL_ALIGNMENT_CENTER))
 
 func _build_game_over() -> void:
 	game_over = Control.new()
