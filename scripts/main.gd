@@ -123,7 +123,8 @@ const PLAYER_SAVE_PROPERTIES = [
 ]
 const ENEMY_SAVE_PROPERTIES = [
 	"speed", "max_health", "health", "damage", "attack_timer", "xp_value",
-	"attack_speed_multiplier", "damage_taken_multiplier"
+	"attack_speed_multiplier", "damage_taken_multiplier", "role_action_timer",
+	"affix_action_timer", "exposed_timer"
 ]
 
 enum State { MENU, PLAYING, PAUSED, GAME_OVER }
@@ -2433,8 +2434,6 @@ func _update_game(delta: float) -> void:
 		else:
 			event_timer = 999.0
 	_auto_force_wave()
-	if Input.is_action_just_pressed("dash"):
-		_use_dash()
 	hud_refresh_timer -= delta
 	if hud_refresh_timer <= 0.0:
 		hud_refresh_timer = _hud_refresh_interval()
@@ -3074,6 +3073,11 @@ func _spawn_enemy(force_kind: String = "", force_elite: bool = false, spawn_over
 		affix = affixes[rng.randi_range(0, affixes.size() - 1)]
 	enemy.setup(enemy_kind, difficulty, elite_roll, affix)
 	_configure_enemy_range(enemy)
+	if enemy_kind not in BOSS_KINDS:
+		enemy.attack_timer = maxf(enemy.attack_timer, rng.randf_range(0.12, 0.68))
+		enemy.role_action_timer = maxf(enemy.role_action_timer, rng.randf_range(0.20, 1.05) if enemy_kind not in MINIBOSS_KINDS else rng.randf_range(0.55, 1.35))
+		if elite_roll:
+			enemy.role_action_timer += rng.randf_range(0.10, 0.35)
 	# Les dégâts augmentent plus doucement que les PV au début, mais continuent à
 	# progresser en fin de run pour éviter le personnage pratiquement immortel.
 	var damage_curve: float = 0.94 + minf(wave_index, 10.0) * 0.024 + minf(maxf(0.0, wave_index - 10.0), 15.0) * 0.014 + maxf(0.0, wave_index - 25.0) * 0.018
@@ -3209,7 +3213,7 @@ func _on_enemy_request_shot(enemy: NomadEnemy, target: Node2D) -> void:
 	var direction: Vector2 = (target.global_position - enemy.global_position).normalized()
 	if enemy.kind == "sentinel" and enemy.windup_direction.length_squared() > 0.01:
 		direction = enemy.windup_direction
-	elif enemy.kind in ["sniper", "suppressor", "phantom", "veil_tech", "salvage_drone", "mobile_turret"] and enemy.role_locked_direction.length_squared() > 0.01:
+	elif enemy.kind in ["blaster", "sniper", "suppressor", "phantom", "veil_tech", "salvage_drone", "mobile_turret"] and enemy.role_locked_direction.length_squared() > 0.01:
 		direction = enemy.role_locked_direction
 	elif enemy.kind == "warden" and enemy.windup_direction.length_squared() > 0.01:
 		direction = enemy.windup_direction
@@ -3265,6 +3269,13 @@ func _on_enemy_request_shot(enemy: NomadEnemy, target: Node2D) -> void:
 		for spread: float in [-0.34, -0.17, 0.0, 0.17, 0.34]:
 			var titan_shot: NomadProjectile = _spawn_projectile(origin, target, enemy.damage * 0.46, true, direction.rotated(spread), titan_tint, "titan")
 			titan_shot.speed = 920.0
+	elif enemy.kind == "blaster" and enemy.role_windup_pattern == "blaster_double":
+		var blaster_tint: Color = Color(0.98, 0.66, 0.30)
+		var side_axis: Vector2 = direction.orthogonal() * 9.0
+		for offset: Vector2 in [-side_axis, side_axis]:
+			var twin_origin: Vector2 = origin + offset
+			var twin_shot: NomadProjectile = _spawn_projectile(twin_origin, target, enemy.damage * 0.58, true, direction, blaster_tint, "standard")
+			twin_shot.speed = 900.0
 	elif enemy.kind == "sniper":
 		var sniper_tint: Color = Color(0.42, 0.86, 1.0)
 		var sniper_spreads: Array[float] = [0.0]
