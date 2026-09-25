@@ -63,7 +63,6 @@ func _create_decor_sprites() -> void:
 	_add_decor("IronPit", IRON_PIT_TEXTURE, Vector2(3070.0, 2480.0), 0.60, false)
 	_add_decor("ScrapHeapEast", SCRAP_HEAP_TEXTURE, Vector2(2660.0, 2860.0), 0.42, false)
 	_add_decor("ScrapHeapWest", SCRAP_HEAP_TEXTURE, Vector2(1380.0, 2840.0), 0.30, true)
-	_add_decor("ScrapHeapSouthEast", SCRAP_HEAP_TEXTURE, Vector2(3430.0, 2840.0), 0.28, true)
 	_add_decor("ScrapHeapNorth", SCRAP_HEAP_TEXTURE, Vector2(2700.0, 2260.0), 0.25, true)
 
 func _decor_sort_offset(tex: Texture2D, scale_value: float) -> float:
@@ -159,7 +158,6 @@ func _build_blockers() -> void:
 	_add_ellipse(Vector2(3070.0, 2550.0), Vector2(102.0, 76.0))
 	_add_ellipse(Vector2(2665.0, 2920.0), Vector2(91.0, 58.0))
 	_add_ellipse(Vector2(1385.0, 2880.0), Vector2(65.0, 45.0))
-	_add_ellipse(Vector2(3435.0, 2880.0), Vector2(61.0, 42.0))
 	_add_ellipse(Vector2(2705.0, 2295.0), Vector2(55.0, 39.0))
 	_add_ellipse(Vector2(1250.0, 2260.0), Vector2(145.0, 74.0))
 	# Soft rocky rim from the background image so the player cannot walk on those visible edges.
