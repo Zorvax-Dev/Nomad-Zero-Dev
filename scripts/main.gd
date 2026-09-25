@@ -1942,7 +1942,7 @@ func _build_pause() -> void:
 	var menu_button: Button = _make_button("MENU PRINCIPAL", Vector2(62.0, 286.0), Vector2(376.0, 56.0), false)
 	menu_button.pressed.connect(_menu_from_pause)
 	card.add_child(menu_button)
-	card.add_child(_make_label("ÉCHAP  •  REPRENDRE     |     V49.0", Vector2(0.0, 375.0), Vector2(500.0, 22.0), 11, Color("87999e"), HORIZONTAL_ALIGNMENT_CENTER))
+	card.add_child(_make_label("ÉCHAP  •  REPRENDRE     |     V49.1", Vector2(0.0, 375.0), Vector2(500.0, 22.0), 11, Color("87999e"), HORIZONTAL_ALIGNMENT_CENTER))
 
 func _build_game_over() -> void:
 	game_over = Control.new()
