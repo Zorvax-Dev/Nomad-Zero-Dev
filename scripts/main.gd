@@ -4758,19 +4758,47 @@ func _update_camera_shake(delta: float) -> void:
 		world_camera.offset = world_camera.offset.lerp(Vector2.ZERO, minf(1.0, delta * 18.0))
 		shake_strength = 0.0
 
+func _telegraph_priority(enemy: NomadEnemy) -> float:
+	if enemy == null:
+		return 0.0
+	var label_text: String = enemy.telegraph_label()
+	match label_text:
+		"BOSS": return 120.0
+		"SNIPER": return 108.0
+		"COLOSSE", "BROYEUR", "GARDIEN DU VOILE": return 98.0
+		"BRISEUR", "LOURD", "AUTOMATE": return 90.0
+		"VOID": return 88.0
+		"SUPPRESSEUR", "TOURELLE", "CHASSEUR PHASE": return 82.0
+		"TECHNICIEN", "BLASTER": return 74.0
+		"PISTEUR", "RAIDER", "ÉCLAIREUR", "DRONE": return 68.0
+		_: return 60.0
+
+func _telegraph_color(label_text: String) -> Color:
+	match label_text:
+		"SNIPER": return Color("9eeeff")
+		"VOID", "BOSS", "CHASSEUR PHASE", "GARDIEN DU VOILE": return Color("c690ff")
+		"BRISEUR", "LOURD", "COLOSSE", "BROYEUR", "AUTOMATE": return Color("ff9a62")
+		"SUPPRESSEUR", "TOURELLE", "BLASTER": return Color("ffd078")
+		_: return Color("ffcc7a")
+
 func _update_threat_indicator() -> void:
 	if threat_label == null or not is_instance_valid(player) or enemies_root == null:
 		return
 	var selected: NomadEnemy = null
-	var selected_distance: float = INF
+	var selected_score: float = -INF
 	for node: Node in enemies_root.get_children():
 		var enemy: NomadEnemy = node as NomadEnemy
 		if enemy == null or not enemy.active or not enemy.has_active_telegraph():
 			continue
 		var distance: float = player.global_position.distance_to(enemy.global_position)
-		if distance < selected_distance:
+		var urgency: float = _telegraph_priority(enemy) - minf(32.0, distance * 0.028)
+		if enemy.windup_left > 0.0:
+			urgency += maxf(0.0, 16.0 - enemy.windup_left * 12.0)
+		elif enemy.role_windup_left > 0.0:
+			urgency += maxf(0.0, 12.0 - enemy.role_windup_left * 10.0)
+		if urgency > selected_score:
 			selected = enemy
-			selected_distance = distance
+			selected_score = urgency
 	if selected == null:
 		threat_label.visible = false
 		threat_label.text = ""
@@ -4788,7 +4816,7 @@ func _update_threat_indicator() -> void:
 	if label_text.is_empty():
 		label_text = "MENACE"
 	threat_label.text = "⚠  %s  %s  •  %s" % [arrow, label_text, direction_text]
-	threat_label.add_theme_color_override("font_color", Color("9eeeff") if label_text == "SNIPER" else (Color("c690ff") if label_text == "VOID" or label_text == "BOSS" else Color("ffcc7a")))
+	threat_label.add_theme_color_override("font_color", _telegraph_color(label_text))
 	var viewport_size: Vector2 = get_viewport_rect().size
 	var zoom_value: Vector2 = world_camera.zoom if is_instance_valid(world_camera) else Vector2(0.66, 0.66)
 	var half_world: Vector2 = Vector2(viewport_size.x / maxf(0.1, zoom_value.x), viewport_size.y / maxf(0.1, zoom_value.y)) * 0.5
