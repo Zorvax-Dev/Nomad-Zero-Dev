@@ -4,7 +4,7 @@ Dépôt privé de développement du projet Godot **NØMAD ZERO**.
 
 - **Stable / production** : `Zorvax-Dev/Nomad-Zero` — reste intact tant qu'une version n'est pas explicitement validée.
 - **Développement** : `Zorvax-Dev/Nomad-Zero-Dev` — sources Godot et futures versions.
-- **Base courante** : **V49.1 — Polish monde & lisibilité**.
+- **Base courante** : **V49.2 — Combat lisibilité**.
 - **Godot** : 4.7.x.
 
 ## Organisation
@@ -24,3 +24,7 @@ Cette passe renforce l’identité des zones avec une ambiance visuelle légère
 ## Automatisation Web
 
 Chaque modification source poussée sur `main` est maintenant validée par Godot 4.7.2, exportée en Web/PWA et testée automatiquement. Si le build est valide, les fichiers `index*` générés sont remis à jour directement à la racine du dépôt. Les builds obsolètes sont annulés pour éviter qu’une ancienne version écrase une version plus récente.
+
+## V49.2
+
+Cette passe réduit les paquets d’ennemis en ajoutant une séparation locale pendant leurs déplacements et une légère correction même lorsqu’ils sont au contact. Les gros profils conservent davantage d’espace autour d’eux, ce qui améliore la lecture des silhouettes et des télégraphes sans réduire la pression du combat.
