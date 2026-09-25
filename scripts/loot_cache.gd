@@ -27,9 +27,9 @@ func _physics_process(delta: float) -> void:
 		queue_redraw()
 		return
 	var dist: float = player.global_position.distance_to(global_position)
-	if dist <= 88.0:
+	if dist <= 94.0:
 		hold_time += delta
-		if hold_time >= 0.48:
+		if hold_time >= 0.42:
 			active = false
 			opened.emit(cache_rank, global_position, zone_hint)
 			queue_free()
@@ -73,5 +73,5 @@ func _draw() -> void:
 	draw_circle(center, 8.0 + breathe * 1.8, Color(color.r, color.g, color.b, 0.72))
 	draw_circle(center, 3.4, Color(0.94, 0.99, 1.0, 0.96))
 	if hold_time > 0.0:
-		var ratio: float = clampf(hold_time / 0.48, 0.0, 1.0)
+		var ratio: float = clampf(hold_time / 0.42, 0.0, 1.0)
 		draw_arc(center, 45.0, -PI * 0.5, -PI * 0.5 + TAU * ratio, 40, Color(1.0, 1.0, 1.0, 0.94), 3.5, true)
