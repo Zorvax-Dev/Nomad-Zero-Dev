@@ -1868,6 +1868,21 @@ func _check_run_synergies() -> void:
 		run_synergies["wide_hunt"] = true
 		player.damage *= 1.06
 		_show_toast("SYNERGIE  •  CHASSE LARGE")
+	if not run_synergies.has("nomad_flow") and player.speed >= 340.0 and player.attack_interval <= 0.365:
+		run_synergies["nomad_flow"] = true
+		player.saber_range += 12.0
+		player.critical_chance = minf(0.42, player.critical_chance + 0.012)
+		_show_toast("SYNERGIE  •  FLUX NOMADE")
+	if not run_synergies.has("rift_conductor") and player.magnet_range >= 340.0 and player.pulse_cooldown <= 3.65:
+		run_synergies["rift_conductor"] = true
+		player.force_wave_radius += 16.0
+		run_fragment_bonus_chance = minf(0.10, run_fragment_bonus_chance + 0.010)
+		_show_toast("SYNERGIE  •  CONDUCTEUR DU RIFT")
+	if not run_synergies.has("iron_will") and player.max_health >= 260.0 and player.armor >= 0.14:
+		run_synergies["iron_will"] = true
+		player.regeneration = minf(1.6, player.regeneration + 0.12)
+		player.heal(22.0)
+		_show_toast("SYNERGIE  •  VOLONTÉ D’ACIER")
 
 func _style_bar(bar: ProgressBar, fill_color: Color, radius: int = 8) -> void:
 	var back: StyleBoxFlat = StyleBoxFlat.new()
