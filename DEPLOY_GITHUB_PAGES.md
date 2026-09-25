@@ -1,34 +1,35 @@
-# NØMAD ZERO Beta 1.0 — déploiement GitHub Pages
+# NØMAD ZERO — build Web/PWA automatisé
 
-Le projet contient un workflow GitHub Actions qui :
+Le dépôt de développement construit désormais automatiquement la version Web/PWA à chaque changement de source poussé sur `main`.
 
-1. télécharge Godot 4.7.2 et ses modèles d'export ;
-2. vérifie les références du projet et la version intégrée de l'écran de chargement ;
-3. ouvre/import le projet en mode headless ;
-4. exporte automatiquement le preset **Web PWA** ;
-5. vérifie que le build contient bien HTML, JavaScript, WASM, PCK, manifest PWA et service worker ;
-6. conserve le build Web comme artefact téléchargeable pendant 14 jours ;
-7. le publie sur GitHub Pages.
+## Ce que fait GitHub Actions
 
-## Mise en ligne
+Le workflow `.github/workflows/godot-ci.yml` :
 
-- Créer ou utiliser un dépôt GitHub pour NØMAD ZERO.
-- Copier le contenu de ce dossier à la racine du dépôt.
-- Pousser sur `main` ou `master`.
-- Dans **Settings → Pages → Build and deployment → Source**, choisir **GitHub Actions**.
-- Ouvrir ensuite l'onglet **Actions** : le workflow `Build and deploy NØMAD ZERO Web PWA` construit et publie le jeu.
+1. installe Godot 4.7.2 et les modèles d’export correspondants ;
+2. vérifie la cohérence de version et toutes les références `res://` ;
+3. importe le projet en mode headless pour détecter les erreurs Godot ;
+4. exporte le preset **Web PWA** ;
+5. exécute le smoke test du build ;
+6. conserve le build complet comme artefact pendant 14 jours ;
+7. remet automatiquement les fichiers `index*` générés à la racine du dépôt sur `main`.
 
-Le workflow peut aussi être lancé manuellement via **Actions → Build and deploy NØMAD ZERO Web PWA → Run workflow**.
+Les exécutions obsolètes sont annulées automatiquement : seul le build correspondant au dernier état de `main` peut être republié.
+
+## GitHub Pages
+
+Si GitHub Pages sert la branche `main` depuis la racine du dépôt, la mise à jour des fichiers `index*` suffit à mettre la nouvelle PWA en ligne sans export manuel local.
+
+Le dépôt stable `Zorvax-Dev/Nomad-Zero` reste indépendant : aucune publication vers ce dépôt n’est faite automatiquement.
 
 ## Test iPhone / PWA
 
-Une fois la page publiée :
+Après une nouvelle publication :
 
-- ouvrir l'URL dans Safari ;
-- lancer le jeu une première fois en ligne et vérifier que l'écran de chargement NØMAD ZERO disparaît au menu ;
-- utiliser **Partager → Sur l'écran d'accueil** ;
-- lancer la PWA depuis l'icône ;
-- faire une partie, quitter complètement, rouvrir et vérifier la sauvegarde ;
-- activer le mode avion après un premier chargement et vérifier que l'écran hors-ligne/PWA se comporte correctement.
+- ouvrir la page dans Safari en paysage ;
+- vérifier le menu et le chargement NØMAD ZERO ;
+- ajouter la page à l’écran d’accueil ;
+- vérifier la reprise de sauvegarde après fermeture complète ;
+- vérifier le comportement hors-ligne après un premier chargement réussi.
 
-Le preset Web est volontairement **sans threads**, ce qui évite les contraintes de `SharedArrayBuffer` et améliore la compatibilité Safari/iOS.
+Le preset Web reste volontairement sans threads pour conserver une bonne compatibilité Safari/iOS.
