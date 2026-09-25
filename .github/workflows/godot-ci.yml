@@ -5,6 +5,10 @@ on:
     branches: ["main"]
     paths-ignore:
       - "index*"
+      - "README.md"
+      - "RELEASE_NOTES_*.md"
+      - "DEPLOY_GITHUB_PAGES.md"
+      - "EXPORT_WEB.md"
   pull_request:
   workflow_dispatch:
 
