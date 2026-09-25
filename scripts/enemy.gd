@@ -465,6 +465,9 @@ func _physics_process(delta: float) -> void:
 			elif dist < ranged_attack_range - 185.0:
 				_move_dir(-to_target.normalized(), delta)
 				moving = true
+			elif not _has_clear_shot():
+				_move_dir(_line_reposition_direction(to_target), delta * 0.82)
+				moving = true
 			elif attack_timer <= 0.0:
 				_start_role_windup("sniper_lock", 0.78 / minf(1.18, attack_speed_multiplier), to_target)
 			else:
@@ -476,6 +479,9 @@ func _physics_process(delta: float) -> void:
 				moving = true
 			elif dist < ranged_attack_range - 140.0:
 				_move_dir(-to_target.normalized(), delta)
+				moving = true
+			elif not _has_clear_shot():
+				_move_dir(_line_reposition_direction(to_target), delta * 0.72)
 				moving = true
 			elif attack_timer <= 0.0:
 				_start_role_windup("suppressor_burst", 0.42 / minf(1.16, attack_speed_multiplier), to_target)
@@ -519,6 +525,9 @@ func _physics_process(delta: float) -> void:
 			elif dist < 210.0:
 				_move_dir(-to_target.normalized(), delta)
 				moving = true
+			elif not _has_clear_shot():
+				_move_dir(_line_reposition_direction(to_target), delta * 0.68)
+				moving = true
 			elif role_action_timer <= 0.0:
 				_start_role_windup("veil_mine", 0.84, to_target)
 			else:
@@ -539,6 +548,9 @@ func _physics_process(delta: float) -> void:
 				moving = true
 			elif dist < 175.0:
 				_move_dir((-to_target.normalized() + to_target.normalized().orthogonal() * strafe_sign * 0.52).normalized(), delta)
+				moving = true
+			elif not _has_clear_shot():
+				_move_dir(_line_reposition_direction(to_target), delta * 0.86)
 				moving = true
 			elif role_action_timer <= 0.0:
 				_start_role_windup("drone_burst", 0.34, to_target)
@@ -561,6 +573,9 @@ func _physics_process(delta: float) -> void:
 			elif dist < ranged_attack_range - 170.0:
 				_move_dir(-to_target.normalized(), delta)
 				moving = true
+			elif not _has_clear_shot():
+				_move_dir(_line_reposition_direction(to_target), delta * 0.56)
+				moving = true
 			elif role_action_timer <= 0.0:
 				_start_role_windup("turret_lock", 0.62, to_target)
 		"leviathan_grinder":
@@ -580,6 +595,9 @@ func _physics_process(delta: float) -> void:
 			elif dist < preferred_range - 120.0:
 				_move_dir((-to_target.normalized() + to_target.normalized().orthogonal() * strafe_sign * 0.30).normalized(), delta)
 				moving = true
+			elif not _has_clear_shot():
+				_move_dir(_line_reposition_direction(to_target), delta * 0.74)
+				moving = true
 			elif attack_timer <= 0.0 and role_action_timer <= 0.0:
 				_start_role_windup("blaster_double", 0.30 / minf(1.14, attack_speed_multiplier), to_target)
 			else:
@@ -591,6 +609,9 @@ func _physics_process(delta: float) -> void:
 				moving = true
 			elif dist < 245.0:
 				_move_dir(-to_target.normalized(), delta)
+				moving = true
+			elif not _has_clear_shot():
+				_move_dir(_line_reposition_direction(to_target), delta * 0.78)
 				moving = true
 			elif attack_timer <= 0.0 and role_action_timer <= 0.0:
 				_start_role_windup("phantom_volley", 0.64, to_target)
@@ -1015,6 +1036,18 @@ func _finish_boss_attack() -> void:
 	exposed_timer = 0.72 if not phase_two else 0.58
 	if kind != "archon":
 		windup_direction = Vector2.ZERO
+
+func _has_clear_shot() -> bool:
+	if world_nav == null or not is_instance_valid(target):
+		return true
+	return world_nav.has_walkable_line(global_position, target.global_position, 4.0)
+
+func _line_reposition_direction(to_target: Vector2) -> Vector2:
+	if to_target.length_squared() <= 0.001:
+		return Vector2.ZERO
+	var forward: Vector2 = to_target.normalized()
+	var side: Vector2 = forward.orthogonal() * strafe_sign
+	return (side + forward * 0.26).normalized()
 
 func _crowd_radius() -> float:
 	if is_boss():
