@@ -66,6 +66,23 @@ func _create_decor_sprites() -> void:
 	_add_decor("ScrapHeapSouthEast", SCRAP_HEAP_TEXTURE, Vector2(3430.0, 2840.0), 0.28, true)
 	_add_decor("ScrapHeapNorth", SCRAP_HEAP_TEXTURE, Vector2(2700.0, 2260.0), 0.25, true)
 
+func _decor_sort_offset(tex: Texture2D, scale_value: float) -> float:
+	# Le sprite est centré dans une grande image transparente : trier sur pos.y faisait
+	# passer le héros devant un bâtiment bien avant d'avoir atteint son pied réel.
+	var source_offset: float = 270.0
+	if tex == CAMP_TEXTURE: source_offset = 476.0
+	elif tex == REFINERY_TEXTURE: source_offset = 440.0
+	elif tex == WRECK_TEXTURE: source_offset = 284.0
+	elif tex == OUTPOST_TEXTURE: source_offset = 435.0
+	elif tex == CANYON_ROCK_TEXTURE: source_offset = 300.0
+	elif tex == ECHO_RUINS_TEXTURE: source_offset = 250.0
+	elif tex == ECHO_SPIRE_TEXTURE: source_offset = 205.0
+	elif tex == LEVIATHAN_TEXTURE: source_offset = 323.0
+	elif tex == SALVAGE_RIG_TEXTURE: source_offset = 402.0
+	elif tex == IRON_PIT_TEXTURE: source_offset = 242.0
+	elif tex == SCRAP_HEAP_TEXTURE: source_offset = 270.0
+	return source_offset * absf(scale_value)
+
 func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool) -> void:
 	# V46.3: les structures reposent sur un sol localement tassé et le réseau de chemins
 	# contourne les volumes de collision. Cette ombre reste légère et sans collision.
@@ -79,7 +96,7 @@ func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: fl
 	spr.position = pos
 	spr.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	spr.scale = Vector2(-scale_value if flip_h else scale_value, scale_value)
-	spr.z_index = int(pos.y)
+	spr.z_index = int(pos.y + _decor_sort_offset(tex, scale_value))
 	spr.modulate = Color.WHITE
 	add_child(spr)
 
@@ -131,16 +148,19 @@ func _build_blockers() -> void:
 	_add_ellipse(Vector2(3630.0, 1335.0), Vector2(135.0, 100.0))
 	_add_ellipse(Vector2(3920.0, 845.0), Vector2(105.0, 88.0))
 	_add_ellipse(Vector2(3870.0, 1600.0), Vector2(68.0, 48.0))
-	# Cimetière d’Épaves. Les collisions restent légèrement à l'intérieur des silhouettes
-	# pour que le glissement le long des carcasses reste naturel sur écran tactile.
-	_add_ellipse(Vector2(2150.0, 2690.0), Vector2(335.0, 160.0))
-	_add_ellipse(Vector2(2370.0, 2525.0), Vector2(115.0, 95.0))
-	_add_ellipse(Vector2(790.0, 2700.0), Vector2(270.0, 185.0))
-	_add_ellipse(Vector2(3160.0, 2515.0), Vector2(210.0, 152.0))
-	_add_ellipse(Vector2(2760.0, 2880.0), Vector2(180.0, 116.0))
-	_add_ellipse(Vector2(1380.0, 2860.0), Vector2(90.0, 62.0))
-	_add_ellipse(Vector2(3430.0, 2860.0), Vector2(84.0, 58.0))
-	_add_ellipse(Vector2(2700.0, 2280.0), Vector2(76.0, 52.0))
+	# Cimetière d’Épaves — empreintes au sol recalées sur les pixels visibles.
+	# Les anciennes ellipses provenaient d'une échelle plus grande et créaient de
+	# larges murs invisibles autour des nouveaux décors.
+	_add_ellipse(Vector2(2140.0, 2765.0), Vector2(158.0, 92.0))
+	_add_ellipse(Vector2(2015.0, 2860.0), Vector2(96.0, 58.0))
+	_add_ellipse(Vector2(2305.0, 2585.0), Vector2(76.0, 66.0))
+	_add_ellipse(Vector2(905.0, 2740.0), Vector2(132.0, 68.0))
+	_add_ellipse(Vector2(800.0, 2618.0), Vector2(58.0, 56.0))
+	_add_ellipse(Vector2(3070.0, 2550.0), Vector2(102.0, 76.0))
+	_add_ellipse(Vector2(2665.0, 2920.0), Vector2(91.0, 58.0))
+	_add_ellipse(Vector2(1385.0, 2880.0), Vector2(65.0, 45.0))
+	_add_ellipse(Vector2(3435.0, 2880.0), Vector2(61.0, 42.0))
+	_add_ellipse(Vector2(2705.0, 2295.0), Vector2(55.0, 39.0))
 	_add_ellipse(Vector2(1250.0, 2260.0), Vector2(145.0, 74.0))
 	# Soft rocky rim from the background image so the player cannot walk on those visible edges.
 	_add_ellipse(Vector2(170.0, 180.0), Vector2(210.0, 105.0))
