@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEXT_EXTS = {'.gd', '.tscn', '.tres', '.cfg', '.godot', '.html'}
-RESOURCE_RE = re.compile(r'res://([^"\'\x60\)\]\s]+)')
+RESOURCE_RE = re.compile(r'res://([^"\'`\)\]\s]+)')
 missing: set[str] = set()
 refs = 0
 
@@ -20,6 +20,7 @@ for path in ROOT.rglob('*'):
     except UnicodeDecodeError:
         continue
     for rel in RESOURCE_RE.findall(text):
+        # Strip simple punctuation that can trail references in prose/config.
         rel = rel.rstrip('.,;:')
         refs += 1
         if not (ROOT / rel).exists():

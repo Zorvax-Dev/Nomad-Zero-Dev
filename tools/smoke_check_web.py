@@ -22,6 +22,7 @@ for suffix in ('.wasm', '.pck', '.js'):
     if not by_suffix.get(suffix):
         problems.append(f'no {suffix} file found')
 
+# PWA export should normally create both manifest and service-worker assets.
 names = [p.name.lower() for p in files]
 if not any('manifest' in n for n in names):
     problems.append('no PWA manifest detected')
