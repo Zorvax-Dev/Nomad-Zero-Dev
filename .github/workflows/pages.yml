@@ -1,0 +1,65 @@
+name: Deploy GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Godot CI"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Prepare Godot Web/PWA site
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          shopt -s nullglob
+          files=(index.*)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No committed Web build found at repository root."
+            exit 1
+          fi
+          for file in "${files[@]}"; do
+            case "$file" in
+              *.import) continue ;;
+            esac
+            cp -f "$file" _site/
+          done
+          touch _site/.nojekyll
+          cp -f index.html _site/404.html
+          test -s _site/index.html
+          test -s _site/index.pck
+          test -s _site/index.wasm
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
