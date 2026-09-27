@@ -43,7 +43,11 @@ func _create_decor_sprites() -> void:
 		{"offset": Vector2(-150.0, -35.0), "radius": Vector2(92.0, 110.0)},
 		{"offset": Vector2(110.0, -32.0), "radius": Vector2(120.0, 92.0)},
 	])
-	_add_decor("RefineryNorthEast", REFINERY_TEXTURE, Vector2(2520.0, 520.0), 0.465352, true)
+	_add_blocking_decor("RefineryNorthEast", REFINERY_TEXTURE, Vector2(2520.0, 520.0), 0.465352, true, [
+		{"offset": Vector2(5.0, 35.0), "radius": Vector2(265.0, 170.0)},
+		{"offset": Vector2(-195.0, 20.0), "radius": Vector2(95.0, 90.0)},
+		{"offset": Vector2(160.0, -50.0), "radius": Vector2(120.0, 115.0)},
+	])
 	_add_decor("WreckSouth", WRECK_TEXTURE, Vector2(1620.0, 1485.0), 0.538828, false)
 	_add_decor("OutpostSouthEast", OUTPOST_TEXTURE, Vector2(2460.0, 1480.0), 0.37, true)
 	_add_decor("RockWest", ROCK_TEXTURE, Vector2(650.0, 1205.0), 0.52, false)
@@ -130,10 +134,7 @@ func _add_landmark_shadow(node_name: String, pos: Vector2, scale_value: float) -
 func _build_blockers() -> void:
 	_blockers.clear()
 	# North-west camp : collisions désormais attachées directement au sprite.
-	# North-east refinery
-	_add_ellipse(Vector2(2525.0, 555.0), Vector2(265.0, 170.0))
-	_add_ellipse(Vector2(2325.0, 540.0), Vector2(95.0, 90.0))
-	_add_ellipse(Vector2(2680.0, 470.0), Vector2(120.0, 115.0))
+	# North-east refinery : collisions attachées au sprite.
 	# South wreck and debris
 	_add_ellipse(Vector2(1600.0, 1510.0), Vector2(295.0, 128.0))
 	_add_ellipse(Vector2(1760.0, 1365.0), Vector2(110.0, 105.0))
