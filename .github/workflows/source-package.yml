@@ -1,0 +1,36 @@
+name: Source Package
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/source-package.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+
+      - name: Package source project
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf package
+          mkdir -p package/NOMAD_ZERO_DEV
+          rsync -a --exclude='.git' --exclude='package' ./ package/NOMAD_ZERO_DEV/
+          cd package
+          zip -qr ../nomad-zero-dev-source.zip NOMAD_ZERO_DEV
+
+      - name: Upload source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nomad-zero-dev-source-${{ github.sha }}
+          path: nomad-zero-dev-source.zip
+          retention-days: 2
+          if-no-files-found: error
