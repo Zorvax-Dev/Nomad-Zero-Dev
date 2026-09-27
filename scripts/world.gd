@@ -72,7 +72,9 @@ func _create_decor_sprites() -> void:
 	_add_blocking_decor("RockSouthWest", ROCK_TEXTURE_MIRROR, Vector2(1080.0, 1660.0), 0.28, false, [
 		{"offset": Vector2(0.0, 32.0), "radius": Vector2(76.0, 54.0)},
 	])
-	_add_decor("RockSouthEast", ROCK_TEXTURE, Vector2(2085.0, 1690.0), 0.30, false)
+	_add_blocking_decor("RockSouthEast", ROCK_TEXTURE, Vector2(2085.0, 1690.0), 0.30, false, [
+		{"offset": Vector2(0.0, 35.0), "radius": Vector2(82.0, 56.0)},
+	])
 	# V47.0 — Canyon des Échos : extension orientale, sans déplacement des zones V46.
 	_add_decor("CanyonGateNorth", CANYON_ROCK_TEXTURE, Vector2(3275.0, 515.0), 0.36, false)
 	_add_decor("CanyonGateSouth", CANYON_ROCK_TEXTURE, Vector2(3290.0, 1540.0), 0.34, true)
@@ -155,7 +157,6 @@ func _build_blockers() -> void:
 	# South wreck : collisions attachées au sprite.
 	# South-east outpost : collision attachée au sprite.
 	# Rock groups around the central lanes
-	_add_ellipse(Vector2(2085.0, 1725.0), Vector2(82.0, 56.0))
 	# V47.0 — Canyon des Échos. Les falaises laissent un corridor central traversable.
 	for x: float in [3210.0, 3435.0, 3660.0, 3890.0, 4050.0]:
 		_add_ellipse(Vector2(x, 205.0), Vector2(165.0, 205.0))
