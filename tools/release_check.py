@@ -47,7 +47,7 @@ checks = {
     "end-of-run build summary present": "run_synergies.size()" in main and "run_module_count" in main and "best_minutes" in main,
     "decor depth sorting present": "_decor_sort_offset" in world and "spr.z_index = int(pos.y + _decor_sort_offset" in world,
     "graveyard density pass present": all(token in world for token in ["ScrapHeapWest", "ScrapHeapNorth", "0.62, false", "0.60, false"]),
-    "graveyard footprint recalibration present": "larges murs invisibles" in world and "Vector2(2140.0, 2765.0)" in world,
+    "graveyard landmark blocking migrated": all(token in world for token in ["LeviathanWreck", "SalvageStation", "IronPit", "ScrapHeapEast", "ScrapHeapWest", "ScrapHeapNorth"]),
     "all visible landmarks are blocking-bound": world.count('_add_blocking_decor("') >= 23 and '_add_decor("' not in world,
     "empty landmark blockers rejected": 'if blockers.is_empty()' in world and 'aucun volume de blocage' in world,
     "terrain blockers initialized before landmarks": world.find("_build_environment_blockers()") < world.find("_create_decor_sprites()"),
