@@ -1,16 +1,30 @@
 extends Node2D
 class_name StylizedWorld
 
-const MAP_TEXTURE: Texture2D = preload("res://assets/map/desert_world_v50.webp")
-const MAP_SCALE: float = 4.0
+const MAP_TEXTURE: Texture2D = preload("res://assets/map/desert_world_v50_1.webp")
+const MAP_SCALE: float = 1.0
 const BOUNDS: Rect2 = Rect2(0.0, 0.0, 4096.0, 3072.0)
 const EDGE_MARGIN: float = 34.0
 const PLAYER_START: Vector2 = Vector2(1536.0, 1024.0)
+
+# V50.1 — chaque élément important reste un asset séparé, net et bloquant.
+const CAMP_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_camp_nomad.png")
+const REFINERY_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_refinery.png")
+const WRECK_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_wreck.png")
+const ROCK_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_rock_main.png")
+const ROCK_TEXTURE_MIRROR: Texture2D = preload("res://assets/decor/v46_1_rock_mirror.png")
+const CANYON_ROCK_TEXTURE: Texture2D = preload("res://assets/decor/v47_canyon_rock.png")
+const LEVIATHAN_TEXTURE: Texture2D = preload("res://assets/decor/v48_leviathan.png")
+const SALVAGE_RIG_TEXTURE: Texture2D = preload("res://assets/decor/v48_salvage_rig.png")
+const SCRAP_HEAP_TEXTURE: Texture2D = preload("res://assets/decor/v48_scrap_heap.png")
+const IRON_PIT_TEXTURE: Texture2D = preload("res://assets/decor/v48_iron_pit.png")
+const SHADOW_TEXTURE: Texture2D = preload("res://assets/effects/ground_shadow.png")
+
 var _blockers: Array[Dictionary] = []
 
 func _ready() -> void:
 	var sprite := Sprite2D.new()
-	sprite.name = "V50WorldMap"
+	sprite.name = "V50_1Terrain"
 	sprite.texture = MAP_TEXTURE
 	sprite.centered = false
 	sprite.position = Vector2.ZERO
@@ -19,71 +33,123 @@ func _ready() -> void:
 	sprite.z_index = -1000
 	add_child(sprite)
 
-	_build_blockers()
-
-func _build_blockers() -> void:
 	_blockers.clear()
+	_create_landmarks()
 
-	# V50 — collisions calées sur les volumes lisibles du fond final.
-	# On ne collisionne que les gros landmarks et falaises : les petits cailloux
-	# restent traversables afin d'éviter tout mur invisible sur mobile.
+func _sort_offset(tex: Texture2D, scale_value: float) -> float:
+	var source_offset: float = 250.0
+	if tex == CAMP_TEXTURE: source_offset = 470.0
+	elif tex == REFINERY_TEXTURE: source_offset = 438.0
+	elif tex == WRECK_TEXTURE: source_offset = 290.0
+	elif tex == CANYON_ROCK_TEXTURE: source_offset = 300.0
+	elif tex == LEVIATHAN_TEXTURE: source_offset = 325.0
+	elif tex == SALVAGE_RIG_TEXTURE: source_offset = 400.0
+	elif tex == IRON_PIT_TEXTURE: source_offset = 245.0
+	elif tex == SCRAP_HEAP_TEXTURE: source_offset = 270.0
+	return source_offset * absf(scale_value)
 
-	# Camp nord-ouest.
-	_add_ellipse(Vector2(585.0, 425.0), Vector2(205.0, 118.0))
-	_add_ellipse(Vector2(430.0, 370.0), Vector2(62.0, 84.0))
+func _add_shadow(node_name: String, pos: Vector2, scale_value: float) -> void:
+	var shadow := Sprite2D.new()
+	shadow.name = node_name + "GroundShadow"
+	shadow.texture = SHADOW_TEXTURE
+	shadow.centered = true
+	shadow.position = pos + Vector2(0.0, 50.0 * scale_value)
+	shadow.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	shadow.scale = Vector2(absf(scale_value) * 3.55, absf(scale_value) * 2.42)
+	shadow.modulate = Color(0.12, 0.085, 0.055, 0.14)
+	shadow.z_index = int(pos.y) - 3
+	add_child(shadow)
 
-	# Raffinerie nord-est.
-	_add_ellipse(Vector2(2425.0, 455.0), Vector2(245.0, 132.0))
-	_add_ellipse(Vector2(2600.0, 360.0), Vector2(78.0, 94.0))
+func _add_landmark(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool, collider_offset: Vector2, collider_radius: Vector2, shadowed: bool = true) -> void:
+	# Le collider principal est créé dans la même fonction que le sprite :
+	# impossible d'ajouter visuellement un landmark sans blocage associé.
+	if shadowed:
+		_add_shadow(node_name, pos, scale_value)
 
-	# Épave centrale.
-	_add_ellipse(Vector2(1660.0, 1495.0), Vector2(250.0, 108.0))
-	_add_ellipse(Vector2(1785.0, 1370.0), Vector2(78.0, 92.0))
+	var spr := Sprite2D.new()
+	spr.name = node_name
+	spr.texture = tex
+	spr.centered = true
+	spr.position = pos
+	spr.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	spr.scale = Vector2(-scale_value if flip_h else scale_value, scale_value)
+	spr.z_index = int(pos.y + _sort_offset(tex, scale_value))
+	spr.modulate = Color.WHITE
+	add_child(spr)
 
-	# Avant-poste central-est.
-	_add_ellipse(Vector2(2435.0, 1535.0), Vector2(170.0, 102.0))
+	_add_ellipse(pos + collider_offset, collider_radius)
 
-	# Ruine / arche du Canyon.
-	_add_ellipse(Vector2(3620.0, 1295.0), Vector2(112.0, 90.0))
+func _create_landmarks() -> void:
+	# Zone nord-ouest — camp nomade détaillé.
+	_add_landmark("CampNorthWest", CAMP_TEXTURE, Vector2(520.0, 500.0), 0.43, false, Vector2(0.0, 56.0), Vector2(205.0, 126.0))
+	_add_ellipse(Vector2(380.0, 462.0), Vector2(70.0, 86.0))
+	_add_ellipse(Vector2(642.0, 470.0), Vector2(82.0, 72.0))
 
-	# Cimetière d'épaves : station, Léviathan et fosse.
-	_add_ellipse(Vector2(760.0, 2550.0), Vector2(150.0, 102.0))
-	_add_ellipse(Vector2(2150.0, 2640.0), Vector2(270.0, 116.0))
-	_add_ellipse(Vector2(3140.0, 2510.0), Vector2(166.0, 106.0))
+	# Zone nord-est — raffinerie, seule grande structure industrielle de cette zone.
+	_add_landmark("RefineryNorthEast", REFINERY_TEXTURE, Vector2(2510.0, 520.0), 0.45, true, Vector2(0.0, 48.0), Vector2(242.0, 142.0))
+	_add_ellipse(Vector2(2318.0, 530.0), Vector2(80.0, 72.0))
+	_add_ellipse(Vector2(2670.0, 470.0), Vector2(90.0, 88.0))
 
-	# Quelques gros affleurements qui structurent réellement les routes.
-	_add_ellipse(Vector2(650.0, 1215.0), Vector2(118.0, 80.0))
-	_add_ellipse(Vector2(1120.0, 850.0), Vector2(78.0, 54.0))
-	_add_ellipse(Vector2(1950.0, 870.0), Vector2(82.0, 56.0))
-	_add_ellipse(Vector2(2250.0, 1165.0), Vector2(112.0, 76.0))
-	_add_ellipse(Vector2(1080.0, 1680.0), Vector2(68.0, 48.0))
-	_add_ellipse(Vector2(2085.0, 1700.0), Vector2(72.0, 50.0))
+	# Épave centrale — grosse silhouette, plusieurs volumes pour coller à la coque.
+	_add_landmark("CentralWreck", WRECK_TEXTURE, Vector2(1640.0, 1490.0), 0.51, false, Vector2(-20.0, 28.0), Vector2(235.0, 94.0))
+	_add_ellipse(Vector2(1780.0, 1382.0), Vector2(76.0, 82.0))
 
-	# Bord rocheux oriental : volumes serrés sur l'extrême droite pour conserver
-	# les routes et les espaces de combat du Canyon.
-	for y: float in [190.0, 650.0, 1110.0, 1580.0, 2060.0, 2550.0, 2960.0]:
-		_add_ellipse(Vector2(4050.0, y), Vector2(190.0, 245.0))
+	# Rochers de circulation — tous indépendants et tous bloquants.
+	_add_landmark("RockWest", ROCK_TEXTURE, Vector2(650.0, 1210.0), 0.48, false, Vector2(0.0, 34.0), Vector2(118.0, 80.0), false)
+	_add_landmark("RockCenterLeft", ROCK_TEXTURE, Vector2(1120.0, 850.0), 0.30, false, Vector2(0.0, 26.0), Vector2(72.0, 50.0), false)
+	_add_landmark("RockCenterRight", ROCK_TEXTURE_MIRROR, Vector2(1950.0, 865.0), 0.31, false, Vector2(0.0, 27.0), Vector2(76.0, 52.0), false)
+	_add_landmark("RockEast", ROCK_TEXTURE_MIRROR, Vector2(2250.0, 1160.0), 0.46, false, Vector2(0.0, 33.0), Vector2(112.0, 76.0), false)
+	_add_landmark("RockSouthWest", ROCK_TEXTURE_MIRROR, Vector2(1080.0, 1660.0), 0.27, false, Vector2(0.0, 24.0), Vector2(64.0, 46.0), false)
+	_add_landmark("RockSouthEast", ROCK_TEXTURE, Vector2(2085.0, 1690.0), 0.28, false, Vector2(0.0, 25.0), Vector2(68.0, 48.0), false)
+
+	# Canyon des Échos — uniquement le rock art détaillé.
+	# Les anciennes formes plates EchoRuins/EchoSpire sont volontairement supprimées.
+	_add_landmark("CanyonGateNorth", CANYON_ROCK_TEXTURE, Vector2(3270.0, 520.0), 0.37, false, Vector2(0.0, 34.0), Vector2(92.0, 64.0), false)
+	_add_landmark("CanyonGateSouth", CANYON_ROCK_TEXTURE, Vector2(3290.0, 1545.0), 0.35, true, Vector2(0.0, 32.0), Vector2(88.0, 61.0), false)
+	_add_landmark("CanyonMonolithWest", CANYON_ROCK_TEXTURE, Vector2(3520.0, 1160.0), 0.31, false, Vector2(0.0, 29.0), Vector2(78.0, 56.0), false)
+	_add_landmark("CanyonMonolithCenter", CANYON_ROCK_TEXTURE, Vector2(3700.0, 1115.0), 0.28, true, Vector2(0.0, 27.0), Vector2(70.0, 51.0), false)
+	_add_landmark("CanyonMonolithEast", CANYON_ROCK_TEXTURE, Vector2(3870.0, 1190.0), 0.30, false, Vector2(0.0, 28.0), Vector2(74.0, 53.0), false)
+	_add_landmark("CanyonRockNorth", CANYON_ROCK_TEXTURE, Vector2(3550.0, 645.0), 0.29, true, Vector2(0.0, 27.0), Vector2(73.0, 52.0), false)
+	_add_landmark("CanyonRockSouth", CANYON_ROCK_TEXTURE, Vector2(3500.0, 1515.0), 0.28, false, Vector2(0.0, 26.0), Vector2(70.0, 50.0), false)
+
+	# Cimetière d'Épaves — chaque objet garde sa silhouette et son blocage propre.
+	_add_landmark("SalvageStation", SALVAGE_RIG_TEXTURE, Vector2(860.0, 2600.0), 0.43, true, Vector2(0.0, 72.0), Vector2(126.0, 76.0))
+	_add_ellipse(Vector2(780.0, 2545.0), Vector2(54.0, 54.0))
+
+	_add_landmark("LeviathanWreck", LEVIATHAN_TEXTURE, Vector2(2140.0, 2660.0), 0.58, false, Vector2(0.0, 82.0), Vector2(150.0, 72.0))
+	_add_ellipse(Vector2(2015.0, 2755.0), Vector2(76.0, 46.0))
+	_add_ellipse(Vector2(2295.0, 2575.0), Vector2(64.0, 56.0))
+
+	_add_landmark("IronPit", IRON_PIT_TEXTURE, Vector2(3080.0, 2490.0), 0.56, false, Vector2(0.0, 60.0), Vector2(100.0, 72.0))
+
+	_add_landmark("ScrapHeapEast", SCRAP_HEAP_TEXTURE, Vector2(2660.0, 2860.0), 0.37, false, Vector2(0.0, 48.0), Vector2(78.0, 49.0))
+	_add_landmark("ScrapHeapWest", SCRAP_HEAP_TEXTURE, Vector2(1380.0, 2840.0), 0.28, true, Vector2(0.0, 38.0), Vector2(59.0, 39.0))
+	_add_landmark("ScrapHeapNorth", SCRAP_HEAP_TEXTURE, Vector2(2700.0, 2260.0), 0.24, true, Vector2(0.0, 33.0), Vector2(51.0, 35.0))
+
+	# Bord rocheux visible de l'est : collision de sécurité uniquement sur l'extrême bord.
+	for y: float in [180.0, 610.0, 1040.0, 1490.0, 1940.0, 2390.0, 2840.0]:
+		_add_ellipse(Vector2(4055.0, y), Vector2(155.0, 205.0))
 
 func _add_ellipse(center: Vector2, radius: Vector2) -> void:
 	_blockers.append({"type": "ellipse", "center": center, "radius": radius})
 
 func echo_ruins_position() -> Vector2:
-	return Vector2(3620.0, 1190.0)
+	return Vector2(3700.0, 1045.0)
 
 func echo_resonator_position() -> Vector2:
-	return Vector2(3800.0, 1080.0)
+	return Vector2(3860.0, 1060.0)
 
 func graveyard_center() -> Vector2:
-	return Vector2(2120.0, 2570.0)
+	return Vector2(2140.0, 2570.0)
 
 func leviathan_position() -> Vector2:
-	return Vector2(2150.0, 2495.0)
+	return Vector2(2140.0, 2510.0)
 
 func salvage_station_position() -> Vector2:
-	return Vector2(760.0, 2420.0)
+	return Vector2(860.0, 2435.0)
 
 func iron_pit_position() -> Vector2:
-	return Vector2(3140.0, 2350.0)
+	return Vector2(3080.0, 2325.0)
 
 func update_streaming(_focus: Vector2, _force: bool = false) -> void:
 	pass
