@@ -1,8 +1,8 @@
 extends Node2D
 class_name StylizedWorld
 
-const MAP_TEXTURE: Texture2D = preload("res://assets/map/desert_world_v48_2c.png")
-const MAP_SCALE: float = 2.0
+const MAP_TEXTURE: Texture2D = preload("res://assets/map/desert_world_rebuild.webp")
+const MAP_SCALE: float = 1.0
 const BOUNDS: Rect2 = Rect2(0.0, 0.0, 4096.0, 3072.0)
 const EDGE_MARGIN: float = 34.0
 const PLAYER_START: Vector2 = Vector2(1536.0, 1024.0)
@@ -25,7 +25,7 @@ var _blockers: Array[Dictionary] = []
 
 func _ready() -> void:
 	var sprite := Sprite2D.new()
-	sprite.name = "V48WorldMap"
+	sprite.name = "RebuildTerrain4096"
 	sprite.texture = MAP_TEXTURE
 	sprite.centered = false
 	sprite.position = Vector2.ZERO
