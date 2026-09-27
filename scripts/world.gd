@@ -108,7 +108,9 @@ func _create_decor_sprites() -> void:
 		{"offset": Vector2(5.0, 120.0), "radius": Vector2(132.0, 68.0)},
 		{"offset": Vector2(-100.0, -2.0), "radius": Vector2(58.0, 56.0)},
 	])
-	_add_decor("IronPit", IRON_PIT_TEXTURE, Vector2(3070.0, 2480.0), 0.60, false)
+	_add_blocking_decor("IronPit", IRON_PIT_TEXTURE, Vector2(3070.0, 2480.0), 0.60, false, [
+		{"offset": Vector2(0.0, 70.0), "radius": Vector2(102.0, 76.0)},
+	])
 	_add_decor("ScrapHeapEast", SCRAP_HEAP_TEXTURE, Vector2(2660.0, 2860.0), 0.42, false)
 	_add_decor("ScrapHeapWest", SCRAP_HEAP_TEXTURE, Vector2(1380.0, 2840.0), 0.30, true)
 	_add_decor("ScrapHeapNorth", SCRAP_HEAP_TEXTURE, Vector2(2700.0, 2260.0), 0.25, true)
@@ -186,7 +188,6 @@ func _build_blockers() -> void:
 	# Cimetière d’Épaves — empreintes au sol recalées sur les pixels visibles.
 	# Les anciennes ellipses provenaient d'une échelle plus grande et créaient de
 	# larges murs invisibles autour des nouveaux décors.
-	_add_ellipse(Vector2(3070.0, 2550.0), Vector2(102.0, 76.0))
 	_add_ellipse(Vector2(2665.0, 2920.0), Vector2(91.0, 58.0))
 	_add_ellipse(Vector2(1385.0, 2880.0), Vector2(65.0, 45.0))
 	_add_ellipse(Vector2(2705.0, 2295.0), Vector2(55.0, 39.0))
