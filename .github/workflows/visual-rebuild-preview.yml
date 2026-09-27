@@ -1,0 +1,36 @@
+name: Visual Rebuild Preview
+
+on:
+  push:
+    branches: ["visual-rebuild"]
+    paths:
+      - "scripts/world.gd"
+      - "assets/map/desert_world_rebuild.webp"
+      - "assets/decor/**"
+      - "tools/render_visual_rebuild.py"
+      - ".github/workflows/visual-rebuild-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-rebuild-preview
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: visual-rebuild
+      - run: python3 -m pip install --quiet pillow
+      - name: Render world and collision previews
+        run: python3 tools/render_visual_rebuild.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-rebuild-preview-${{ github.sha }}
+          path: build/visual-rebuild-preview
+          retention-days: 3
+          if-no-files-found: error
