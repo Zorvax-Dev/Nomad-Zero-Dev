@@ -313,7 +313,6 @@ var fragment_label: Label
 var zone_banner_panel: Panel
 var zone_banner_label: Label
 var zone_banner_subtitle_label: Label
-var zone_mood_overlay: ColorRect
 var rift_overlay: ColorRect
 const MAX_ACTIVE_ENEMIES: int = 18
 const MAX_ACTIVE_PROJECTILES: int = 40
@@ -1381,14 +1380,6 @@ func _build_hud() -> void:
 	grade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(grade)
 	full_bleed_controls.append(grade)
-
-	zone_mood_overlay = ColorRect.new()
-	zone_mood_overlay.position = Vector2.ZERO
-	zone_mood_overlay.size = VIEW
-	zone_mood_overlay.color = Color(0.0, 0.0, 0.0, 0.0)
-	zone_mood_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud.add_child(zone_mood_overlay)
-	full_bleed_controls.append(zone_mood_overlay)
 
 	hud_status = Panel.new()
 	hud_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -2702,18 +2693,6 @@ func _zone_color(zone: String) -> Color:
 			return Color(0.94, 0.76, 0.48)
 		_:
 			return Color(0.78, 0.80, 0.82)
-
-func _zone_mood_color(zone: String) -> Color:
-	match zone:
-		"CAMP NOMADE": return Color(0.30, 0.44, 0.34, 0.060)
-		"ÉPAVE DU PÈLERIN": return Color(0.48, 0.33, 0.16, 0.056)
-		"AVANT-POSTE": return Color(0.38, 0.30, 0.14, 0.048)
-		"RAFFINERIE": return Color(0.16, 0.33, 0.40, 0.058)
-		"PLAINE CENTRALE": return Color(0.26, 0.20, 0.34, 0.050)
-		"CANYON DES ÉCHOS": return Color(0.45, 0.24, 0.18, 0.060)
-		"CIMETIÈRE D’ÉPAVES": return Color(0.20, 0.24, 0.28, 0.072)
-		"DÉSERT OUVERT": return Color(0.43, 0.31, 0.16, 0.036)
-		_: return Color(0.0, 0.0, 0.0, 0.0)
 
 func _zone_banner_subtitle(zone: String) -> String:
 	match zone:
@@ -5118,11 +5097,6 @@ func _on_rift_fragment_collected(value: int) -> void:
 	_save_profile()
 
 func _update_zone_banner(delta: float) -> void:
-	if zone_mood_overlay != null:
-		var target_color: Color = _zone_mood_color(_player_zone())
-		if dynamic_event_active:
-			target_color = target_color.lerp(Color(0.44, 0.20, 0.58, 0.10), 0.55)
-		zone_mood_overlay.color = zone_mood_overlay.color.lerp(target_color, minf(1.0, delta * 2.4))
 	if zone_banner_panel == null:
 		return
 	if zone_banner_timer <= 0.0:
