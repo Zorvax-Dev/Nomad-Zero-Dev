@@ -88,7 +88,9 @@ func _create_decor_sprites() -> void:
 	_add_blocking_decor("CanyonRockSouth", CANYON_ROCK_TEXTURE, Vector2(3490.0, 1515.0), 0.29, false, [
 		{"offset": Vector2(0.0, 33.0), "radius": Vector2(86.0, 60.0)},
 	])
-	_add_decor("EchoRuins", ECHO_RUINS_TEXTURE, Vector2(3630.0, 1310.0), 0.50, false)
+	_add_blocking_decor("EchoRuins", ECHO_RUINS_TEXTURE, Vector2(3630.0, 1310.0), 0.50, false, [
+		{"offset": Vector2(0.0, 25.0), "radius": Vector2(135.0, 100.0)},
+	])
 	_add_decor("EchoSpire", ECHO_SPIRE_TEXTURE, Vector2(3920.0, 820.0), 0.55, false)
 	_add_decor("CanyonRockEast", CANYON_ROCK_TEXTURE, Vector2(3870.0, 1570.0), 0.24, true)
 	# V49.6 — densité visuelle revue avec uniquement les assets existants de la zone :
@@ -170,7 +172,6 @@ func _build_blockers() -> void:
 		_add_ellipse(Vector2(x, 205.0), Vector2(165.0, 205.0))
 		_add_ellipse(Vector2(x, 1840.0), Vector2(170.0, 208.0))
 	# Pierres d'entrée et points d'intérêt du canyon.
-	_add_ellipse(Vector2(3630.0, 1335.0), Vector2(135.0, 100.0))
 	_add_ellipse(Vector2(3920.0, 845.0), Vector2(105.0, 88.0))
 	_add_ellipse(Vector2(3870.0, 1600.0), Vector2(68.0, 48.0))
 	# Cimetière d’Épaves — empreintes au sol recalées sur les pixels visibles.
