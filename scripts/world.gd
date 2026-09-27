@@ -99,7 +99,11 @@ func _create_decor_sprites() -> void:
 	])
 	# V49.6 — densité visuelle revue avec uniquement les assets existants de la zone :
 	# les volumes sont plus présents sans changer la palette ni introduire un nouveau style.
-	_add_decor("LeviathanWreck", LEVIATHAN_TEXTURE, Vector2(2150.0, 2670.0), 0.62, false)
+	_add_blocking_decor("LeviathanWreck", LEVIATHAN_TEXTURE, Vector2(2150.0, 2670.0), 0.62, false, [
+		{"offset": Vector2(-10.0, 95.0), "radius": Vector2(158.0, 92.0)},
+		{"offset": Vector2(-135.0, 190.0), "radius": Vector2(96.0, 58.0)},
+		{"offset": Vector2(155.0, -85.0), "radius": Vector2(76.0, 66.0)},
+	])
 	_add_decor("SalvageStation", SALVAGE_RIG_TEXTURE, Vector2(900.0, 2620.0), 0.46, true)
 	_add_decor("IronPit", IRON_PIT_TEXTURE, Vector2(3070.0, 2480.0), 0.60, false)
 	_add_decor("ScrapHeapEast", SCRAP_HEAP_TEXTURE, Vector2(2660.0, 2860.0), 0.42, false)
@@ -179,9 +183,6 @@ func _build_blockers() -> void:
 	# Cimetière d’Épaves — empreintes au sol recalées sur les pixels visibles.
 	# Les anciennes ellipses provenaient d'une échelle plus grande et créaient de
 	# larges murs invisibles autour des nouveaux décors.
-	_add_ellipse(Vector2(2140.0, 2765.0), Vector2(158.0, 92.0))
-	_add_ellipse(Vector2(2015.0, 2860.0), Vector2(96.0, 58.0))
-	_add_ellipse(Vector2(2305.0, 2585.0), Vector2(76.0, 66.0))
 	_add_ellipse(Vector2(905.0, 2740.0), Vector2(132.0, 68.0))
 	_add_ellipse(Vector2(800.0, 2618.0), Vector2(58.0, 56.0))
 	_add_ellipse(Vector2(3070.0, 2550.0), Vector2(102.0, 76.0))
