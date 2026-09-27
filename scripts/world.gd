@@ -34,8 +34,8 @@ func _ready() -> void:
 	sprite.z_index = -1000
 	add_child(sprite)
 
+	_build_environment_blockers()
 	_create_decor_sprites()
-	_build_blockers()
 
 func _create_decor_sprites() -> void:
 	_add_blocking_decor("CampNorthWest", CAMP_TEXTURE, Vector2(500.0, 500.0), 0.440859, false, [
@@ -158,6 +158,9 @@ func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: fl
 func _add_blocking_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool, blockers: Array[Dictionary]) -> void:
 	# Reconstruction visuelle : un élément important ne peut plus être ajouté sans
 	# déclarer explicitement ses volumes de blocage dans le même appel.
+	if blockers.is_empty():
+		push_error("Landmark %s refusé : aucun volume de blocage." % node_name)
+		return
 	_add_decor(node_name, tex, pos, scale_value, flip_h)
 	for blocker: Dictionary in blockers:
 		var offset: Vector2 = blocker.get("offset", Vector2.ZERO)
@@ -179,7 +182,9 @@ func _add_landmark_shadow(node_name: String, pos: Vector2, scale_value: float) -
 	shadow.z_index = int(pos.y) - 2
 	add_child(shadow)
 
-func _build_blockers() -> void:
+func _build_environment_blockers() -> void:
+	# Les seuls colliders déclarés ici correspondent au terrain lui-même
+	# (falaises/bordures visibles). Les objets ont leurs colliders dans _add_blocking_decor.
 	_blockers.clear()
 	# North-west camp : collisions désormais attachées directement au sprite.
 	# North-east refinery : collisions attachées au sprite.
