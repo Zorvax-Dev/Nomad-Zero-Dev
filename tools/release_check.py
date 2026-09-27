@@ -48,6 +48,7 @@ checks = {
     "V50.1 native terrain active": 'desert_world_v50_1.webp' in world and 'const MAP_SCALE: float = 1.0' in world and 'V50_1Terrain' in world and (ROOT / "assets" / "map" / "desert_world_v50_1.webp").exists(),
     "landmarks remain modular": all(token in world for token in ["_add_landmark", "CAMP_TEXTURE", "REFINERY_TEXTURE", "WRECK_TEXTURE", "LEVIATHAN_TEXTURE", "SALVAGE_RIG_TEXTURE", "IRON_PIT_TEXTURE"]),
     "every landmark creates blocking": "_add_ellipse(pos + collider_offset, collider_radius)" in world,
+    "world contains enough independent landmarks": world.count("_add_landmark(") >= 18,
     "low-detail canyon assets removed": all(token not in world for token in ["ECHO_RUINS_TEXTURE", "ECHO_SPIRE_TEXTURE", "OUTPOST_TEXTURE"]),
     "obsolete blurry V50 map removed": not (ROOT / "assets" / "map" / "desert_world_v50.webp").exists(),
     "removed weak decor assets absent": all(not (ROOT / "assets" / "decor" / name).exists() for name in ["v47_echo_ruins.png", "v47_echo_spire.png", "v46_1_outpost.png"]),
