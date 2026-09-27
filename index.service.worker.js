@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1790526923|6605773';
+const CACHE_VERSION = '1790527015|6211424';
 /** @type {string} */
 const CACHE_PREFIX = 'NØMAD ZERO-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
