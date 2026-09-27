@@ -4,7 +4,7 @@ Dépôt privé de développement du projet Godot **NØMAD ZERO**.
 
 - **Stable / production** : `Zorvax-Dev/Nomad-Zero` — reste intact tant qu'une version n'est pas explicitement validée.
 - **Développement** : `Zorvax-Dev/Nomad-Zero-Dev` — sources Godot et futures versions.
-- **Base courante** : **V49.6 — Monde & collisions**.
+- **Base courante** : **V50.0 — Reconstruction visuelle**.
 - **Godot** : 4.7.x.
 
 ## Organisation
@@ -44,3 +44,7 @@ Cette passe rend les combats et l’exploration moins mécaniques : les ennemis 
 ## V49.6
 
 Passe visuelle et collision du monde : les landmarks utilisent désormais un vrai niveau de tri basé sur leur pied visuel afin que le héros passe derrière/devant au bon moment. Le Cimetière d’Épaves a été densifié uniquement avec les assets existants, avec des proportions revues et des empreintes de collision entièrement recalées sur les pixels visibles pour supprimer les grands murs invisibles. Le Canyon et l’Avant-poste ont aussi été légèrement rééquilibrés en échelle.
+
+## V50.0
+
+Reconstruction visuelle du monde : nouvelle carte de fond cohérente, palette unifiée, sol retravaillé, landmarks intégrés dans la même direction artistique, suppression de la superposition des anciens décors et recalage des collisions/points d’intérêt sur la nouvelle carte. Le gameplay V49 reste conservé.
