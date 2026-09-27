@@ -117,7 +117,9 @@ func _create_decor_sprites() -> void:
 	_add_blocking_decor("ScrapHeapWest", SCRAP_HEAP_TEXTURE, Vector2(1380.0, 2840.0), 0.30, true, [
 		{"offset": Vector2(5.0, 40.0), "radius": Vector2(65.0, 45.0)},
 	])
-	_add_decor("ScrapHeapNorth", SCRAP_HEAP_TEXTURE, Vector2(2700.0, 2260.0), 0.25, true)
+	_add_blocking_decor("ScrapHeapNorth", SCRAP_HEAP_TEXTURE, Vector2(2700.0, 2260.0), 0.25, true, [
+		{"offset": Vector2(5.0, 35.0), "radius": Vector2(55.0, 39.0)},
+	])
 
 func _decor_sort_offset(tex: Texture2D, scale_value: float) -> float:
 	# Le sprite est centré dans une grande image transparente : trier sur pos.y faisait
@@ -192,7 +194,6 @@ func _build_blockers() -> void:
 	# Cimetière d’Épaves — empreintes au sol recalées sur les pixels visibles.
 	# Les anciennes ellipses provenaient d'une échelle plus grande et créaient de
 	# larges murs invisibles autour des nouveaux décors.
-	_add_ellipse(Vector2(2705.0, 2295.0), Vector2(55.0, 39.0))
 	_add_ellipse(Vector2(1250.0, 2260.0), Vector2(145.0, 74.0))
 	# Soft rocky rim from the background image so the player cannot walk on those visible edges.
 	_add_ellipse(Vector2(170.0, 180.0), Vector2(210.0, 105.0))
