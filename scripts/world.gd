@@ -11,7 +11,6 @@ const REFINERY_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_refinery.p
 const WRECK_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_wreck.png")
 const ROCK_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_rock_main.png")
 const ROCK_TEXTURE_MIRROR: Texture2D = preload("res://assets/decor/v46_1_rock_mirror.png")
-const OUTPOST_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_outpost.png")
 const CANYON_ROCK_TEXTURE: Texture2D = preload("res://assets/decor/v47_canyon_rock.png")
 const ECHO_RUINS_TEXTURE: Texture2D = preload("res://assets/decor/v47_echo_ruins.png")
 const ECHO_SPIRE_TEXTURE: Texture2D = preload("res://assets/decor/v47_echo_spire.png")
@@ -54,8 +53,9 @@ func _create_decor_sprites() -> void:
 		{"offset": Vector2(-300.0, -15.0), "radius": Vector2(90.0, 70.0)},
 		{"offset": Vector2(250.0, 25.0), "radius": Vector2(92.0, 70.0)},
 	])
-	_add_blocking_decor("OutpostSouthEast", OUTPOST_TEXTURE, Vector2(2460.0, 1480.0), 0.37, true, [
-		{"offset": Vector2(0.0, 35.0), "radius": Vector2(185.0, 126.0)},
+	_add_blocking_decor("OutpostSouthEast", SALVAGE_RIG_TEXTURE, Vector2(2460.0, 1480.0), 0.31, false, [
+		{"offset": Vector2(0.0, 42.0), "radius": Vector2(168.0, 112.0)},
+		{"offset": Vector2(82.0, -30.0), "radius": Vector2(58.0, 64.0)},
 	])
 	_add_blocking_decor("RockWest", ROCK_TEXTURE, Vector2(650.0, 1205.0), 0.52, false, [
 		{"offset": Vector2(0.0, 45.0), "radius": Vector2(135.0, 92.0)},
@@ -128,7 +128,6 @@ func _decor_sort_offset(tex: Texture2D, scale_value: float) -> float:
 	if tex == CAMP_TEXTURE: source_offset = 476.0
 	elif tex == REFINERY_TEXTURE: source_offset = 440.0
 	elif tex == WRECK_TEXTURE: source_offset = 284.0
-	elif tex == OUTPOST_TEXTURE: source_offset = 435.0
 	elif tex == CANYON_ROCK_TEXTURE: source_offset = 300.0
 	elif tex == ECHO_RUINS_TEXTURE: source_offset = 250.0
 	elif tex == ECHO_SPIRE_TEXTURE: source_offset = 205.0
@@ -141,7 +140,7 @@ func _decor_sort_offset(tex: Texture2D, scale_value: float) -> float:
 func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool) -> void:
 	# V46.3: les structures reposent sur un sol localement tassé et le réseau de chemins
 	# contourne les volumes de collision. Cette ombre reste légère et sans collision.
-	if tex == CAMP_TEXTURE or tex == REFINERY_TEXTURE or tex == WRECK_TEXTURE or tex == OUTPOST_TEXTURE or tex == ECHO_RUINS_TEXTURE or tex == ECHO_SPIRE_TEXTURE or tex == LEVIATHAN_TEXTURE or tex == SALVAGE_RIG_TEXTURE or tex == IRON_PIT_TEXTURE:
+	if tex == CAMP_TEXTURE or tex == REFINERY_TEXTURE or tex == WRECK_TEXTURE or tex == ECHO_RUINS_TEXTURE or tex == ECHO_SPIRE_TEXTURE or tex == LEVIATHAN_TEXTURE or tex == SALVAGE_RIG_TEXTURE or tex == IRON_PIT_TEXTURE:
 		_add_landmark_shadow(node_name, pos, scale_value)
 
 	var spr := Sprite2D.new()
