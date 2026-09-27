@@ -63,7 +63,9 @@ func _create_decor_sprites() -> void:
 	_add_blocking_decor("RockEast", ROCK_TEXTURE_MIRROR, Vector2(2250.0, 1150.0), 0.49, false, [
 		{"offset": Vector2(0.0, 40.0), "radius": Vector2(130.0, 90.0)},
 	])
-	_add_decor("RockCenterLeft", ROCK_TEXTURE, Vector2(1120.0, 850.0), 0.32, false)
+	_add_blocking_decor("RockCenterLeft", ROCK_TEXTURE, Vector2(1120.0, 850.0), 0.32, false, [
+		{"offset": Vector2(0.0, 30.0), "radius": Vector2(88.0, 60.0)},
+	])
 	_add_decor("RockCenterRight", ROCK_TEXTURE_MIRROR, Vector2(1950.0, 860.0), 0.34, false)
 	_add_decor("RockSouthWest", ROCK_TEXTURE_MIRROR, Vector2(1080.0, 1660.0), 0.28, false)
 	_add_decor("RockSouthEast", ROCK_TEXTURE, Vector2(2085.0, 1690.0), 0.30, false)
@@ -149,7 +151,6 @@ func _build_blockers() -> void:
 	# South wreck : collisions attachées au sprite.
 	# South-east outpost : collision attachée au sprite.
 	# Rock groups around the central lanes
-	_add_ellipse(Vector2(1120.0, 880.0), Vector2(88.0, 60.0))
 	_add_ellipse(Vector2(1950.0, 892.0), Vector2(92.0, 62.0))
 	_add_ellipse(Vector2(1080.0, 1692.0), Vector2(76.0, 54.0))
 	_add_ellipse(Vector2(2085.0, 1725.0), Vector2(82.0, 56.0))
