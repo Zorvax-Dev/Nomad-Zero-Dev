@@ -12,8 +12,6 @@ const WRECK_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_wreck.png")
 const ROCK_TEXTURE: Texture2D = preload("res://assets/decor/v46_1_rock_main.png")
 const ROCK_TEXTURE_MIRROR: Texture2D = preload("res://assets/decor/v46_1_rock_mirror.png")
 const CANYON_ROCK_TEXTURE: Texture2D = preload("res://assets/decor/v47_canyon_rock.png")
-const ECHO_RUINS_TEXTURE: Texture2D = preload("res://assets/decor/v47_echo_ruins.png")
-const ECHO_SPIRE_TEXTURE: Texture2D = preload("res://assets/decor/v47_echo_spire.png")
 const LEVIATHAN_TEXTURE: Texture2D = preload("res://assets/decor/v48_leviathan.png")
 const SALVAGE_RIG_TEXTURE: Texture2D = preload("res://assets/decor/v48_salvage_rig.png")
 const SCRAP_HEAP_TEXTURE: Texture2D = preload("res://assets/decor/v48_scrap_heap.png")
@@ -91,8 +89,8 @@ func _create_decor_sprites() -> void:
 	_add_blocking_decor("EchoRuins", CANYON_ROCK_TEXTURE, Vector2(3630.0, 1310.0), 0.36, false, [
 		{"offset": Vector2(0.0, 34.0), "radius": Vector2(104.0, 72.0)},
 	])
-	_add_blocking_decor("EchoSpire", ECHO_SPIRE_TEXTURE, Vector2(3920.0, 820.0), 0.55, false, [
-		{"offset": Vector2(0.0, 25.0), "radius": Vector2(105.0, 88.0)},
+	_add_blocking_decor("EchoSpire", CANYON_ROCK_TEXTURE, Vector2(3920.0, 820.0), 0.30, true, [
+		{"offset": Vector2(0.0, 30.0), "radius": Vector2(86.0, 62.0)},
 	])
 	_add_blocking_decor("CanyonRockEast", CANYON_ROCK_TEXTURE, Vector2(3870.0, 1570.0), 0.24, true, [
 		{"offset": Vector2(0.0, 30.0), "radius": Vector2(68.0, 48.0)},
@@ -129,8 +127,6 @@ func _decor_sort_offset(tex: Texture2D, scale_value: float) -> float:
 	elif tex == REFINERY_TEXTURE: source_offset = 440.0
 	elif tex == WRECK_TEXTURE: source_offset = 284.0
 	elif tex == CANYON_ROCK_TEXTURE: source_offset = 300.0
-	elif tex == ECHO_RUINS_TEXTURE: source_offset = 250.0
-	elif tex == ECHO_SPIRE_TEXTURE: source_offset = 205.0
 	elif tex == LEVIATHAN_TEXTURE: source_offset = 323.0
 	elif tex == SALVAGE_RIG_TEXTURE: source_offset = 402.0
 	elif tex == IRON_PIT_TEXTURE: source_offset = 242.0
@@ -140,7 +136,7 @@ func _decor_sort_offset(tex: Texture2D, scale_value: float) -> float:
 func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool) -> void:
 	# V46.3: les structures reposent sur un sol localement tassé et le réseau de chemins
 	# contourne les volumes de collision. Cette ombre reste légère et sans collision.
-	if tex == CAMP_TEXTURE or tex == REFINERY_TEXTURE or tex == WRECK_TEXTURE or tex == ECHO_RUINS_TEXTURE or tex == ECHO_SPIRE_TEXTURE or tex == LEVIATHAN_TEXTURE or tex == SALVAGE_RIG_TEXTURE or tex == IRON_PIT_TEXTURE:
+	if tex == CAMP_TEXTURE or tex == REFINERY_TEXTURE or tex == WRECK_TEXTURE or tex == LEVIATHAN_TEXTURE or tex == SALVAGE_RIG_TEXTURE or tex == IRON_PIT_TEXTURE:
 		_add_landmark_shadow(node_name, pos, scale_value)
 
 	var spr := Sprite2D.new()
