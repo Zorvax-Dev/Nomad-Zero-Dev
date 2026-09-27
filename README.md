@@ -4,7 +4,7 @@ Dépôt privé de développement du projet Godot **NØMAD ZERO**.
 
 - **Stable / production** : `Zorvax-Dev/Nomad-Zero` — reste intact tant qu'une version n'est pas explicitement validée.
 - **Développement** : `Zorvax-Dev/Nomad-Zero-Dev` — sources Godot et futures versions.
-- **Base courante** : **V50.0 — Reconstruction visuelle**.
+- **Base courante** : **V50.1 — Monde modulaire HD**.
 - **Godot** : 4.7.x.
 
 ## Organisation
@@ -48,3 +48,7 @@ Passe visuelle et collision du monde : les landmarks utilisent désormais un vra
 ## V50.0
 
 Reconstruction visuelle du monde : nouvelle carte de fond cohérente, palette unifiée, sol retravaillé, landmarks intégrés dans la même direction artistique, suppression de la superposition des anciens décors et recalage des collisions/points d’intérêt sur la nouvelle carte. Le gameplay V49 reste conservé.
+
+## V50.1
+
+Correction structurelle de la refonte visuelle : le fond revient à un terrain seul en **4096×3072 natif**, sans structure incrustée. Tous les landmarks visibles sont des sprites indépendants, chacun associé à son blocage dès sa création. Les anciens assets simplistes du Canyon et l'outpost dupliqué ont été supprimés. Les structures détaillées conservent leur netteté native et les collisions restent directement liées à leur position réelle.
