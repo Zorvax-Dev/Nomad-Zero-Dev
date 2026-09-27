@@ -36,24 +36,24 @@ func _ready() -> void:
 
 func _create_decor_sprites() -> void:
 	_add_blocking_decor("CampNorthWest", CAMP_TEXTURE, Vector2(500.0, 500.0), 0.440859, false, [
-		{"offset": Vector2(0.0, 60.0), "radius": Vector2(225.0, 150.0)},
-		{"offset": Vector2(-150.0, -35.0), "radius": Vector2(92.0, 110.0)},
-		{"offset": Vector2(110.0, -32.0), "radius": Vector2(120.0, 92.0)},
+		{"offset": Vector2(0.0, 65.0), "radius": Vector2(185.0, 105.0)},
+		{"offset": Vector2(-135.0, -25.0), "radius": Vector2(55.0, 70.0)},
+		{"offset": Vector2(110.0, -25.0), "radius": Vector2(70.0, 55.0)},
 	])
 	_add_blocking_decor("RefineryNorthEast", REFINERY_TEXTURE, Vector2(2520.0, 520.0), 0.465352, true, [
-		{"offset": Vector2(5.0, 35.0), "radius": Vector2(265.0, 170.0)},
-		{"offset": Vector2(-195.0, 20.0), "radius": Vector2(95.0, 90.0)},
-		{"offset": Vector2(160.0, -50.0), "radius": Vector2(120.0, 115.0)},
+		{"offset": Vector2(0.0, 55.0), "radius": Vector2(205.0, 110.0)},
+		{"offset": Vector2(-175.0, 15.0), "radius": Vector2(62.0, 58.0)},
+		{"offset": Vector2(150.0, -45.0), "radius": Vector2(72.0, 72.0)},
 	])
 	_add_blocking_decor("WreckSouth", WRECK_TEXTURE, Vector2(1620.0, 1485.0), 0.538828, false, [
-		{"offset": Vector2(-20.0, 25.0), "radius": Vector2(295.0, 128.0)},
-		{"offset": Vector2(140.0, -120.0), "radius": Vector2(110.0, 105.0)},
-		{"offset": Vector2(-300.0, -15.0), "radius": Vector2(90.0, 70.0)},
-		{"offset": Vector2(250.0, 25.0), "radius": Vector2(92.0, 70.0)},
+		{"offset": Vector2(-10.0, 25.0), "radius": Vector2(220.0, 78.0)},
+		{"offset": Vector2(140.0, -100.0), "radius": Vector2(60.0, 64.0)},
+		{"offset": Vector2(-250.0, -5.0), "radius": Vector2(50.0, 38.0)},
+		{"offset": Vector2(220.0, 20.0), "radius": Vector2(50.0, 38.0)},
 	])
-	_add_blocking_decor("OutpostSouthEast", SALVAGE_RIG_TEXTURE, Vector2(2460.0, 1480.0), 0.31, false, [
-		{"offset": Vector2(0.0, 42.0), "radius": Vector2(168.0, 112.0)},
-		{"offset": Vector2(82.0, -30.0), "radius": Vector2(58.0, 64.0)},
+	_add_blocking_decor("OutpostSouthEast", SALVAGE_RIG_TEXTURE, Vector2(2460.0, 1480.0), 0.38, false, [
+		{"offset": Vector2(0.0, 50.0), "radius": Vector2(150.0, 85.0)},
+		{"offset": Vector2(80.0, -30.0), "radius": Vector2(45.0, 52.0)},
 	])
 	_add_blocking_decor("RockWest", ROCK_TEXTURE, Vector2(650.0, 1205.0), 0.52, false, [
 		{"offset": Vector2(0.0, 45.0), "radius": Vector2(135.0, 92.0)},
@@ -76,25 +76,25 @@ func _create_decor_sprites() -> void:
 	# V47.0 — Canyon des Échos : extension orientale, sans déplacement des zones V46.
 	_add_blocking_decor("CanyonGateNorth", CANYON_ROCK_TEXTURE, Vector2(3275.0, 515.0), 0.36, false, [
 		{"offset": Vector2(0.0, 30.0), "radius": Vector2(105.0, 72.0)},
-	])
+	, Color(0.84, 0.96, 1.0, 1.0)))
 	_add_blocking_decor("CanyonGateSouth", CANYON_ROCK_TEXTURE, Vector2(3290.0, 1540.0), 0.34, true, [
 		{"offset": Vector2(0.0, 30.0), "radius": Vector2(100.0, 70.0)},
-	])
+	, Color(0.84, 0.96, 1.0, 1.0)))
 	_add_blocking_decor("CanyonRockNorth", CANYON_ROCK_TEXTURE, Vector2(3540.0, 610.0), 0.31, true, [
 		{"offset": Vector2(0.0, 32.0), "radius": Vector2(90.0, 62.0)},
-	])
+	, Color(0.84, 0.96, 1.0, 1.0)))
 	_add_blocking_decor("CanyonRockSouth", CANYON_ROCK_TEXTURE, Vector2(3490.0, 1515.0), 0.29, false, [
 		{"offset": Vector2(0.0, 33.0), "radius": Vector2(86.0, 60.0)},
-	])
+	, Color(0.84, 0.96, 1.0, 1.0)))
 	_add_blocking_decor("EchoRuins", CANYON_ROCK_TEXTURE, Vector2(3630.0, 1310.0), 0.36, false, [
 		{"offset": Vector2(0.0, 34.0), "radius": Vector2(104.0, 72.0)},
-	])
+	, Color(0.84, 0.96, 1.0, 1.0)))
 	_add_blocking_decor("EchoSpire", CANYON_ROCK_TEXTURE, Vector2(3920.0, 820.0), 0.30, true, [
 		{"offset": Vector2(0.0, 30.0), "radius": Vector2(86.0, 62.0)},
-	])
+	, Color(0.84, 0.96, 1.0, 1.0)))
 	_add_blocking_decor("CanyonRockEast", CANYON_ROCK_TEXTURE, Vector2(3870.0, 1570.0), 0.24, true, [
 		{"offset": Vector2(0.0, 30.0), "radius": Vector2(68.0, 48.0)},
-	])
+	, Color(0.84, 0.96, 1.0, 1.0)))
 	# V49.6 — densité visuelle revue avec uniquement les assets existants de la zone :
 	# les volumes sont plus présents sans changer la palette ni introduire un nouveau style.
 	_add_blocking_decor("LeviathanWreck", LEVIATHAN_TEXTURE, Vector2(2150.0, 2670.0), 0.62, false, [
@@ -133,7 +133,7 @@ func _decor_sort_offset(tex: Texture2D, scale_value: float) -> float:
 	elif tex == SCRAP_HEAP_TEXTURE: source_offset = 270.0
 	return source_offset * absf(scale_value)
 
-func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool) -> void:
+func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool, tint: Color = Color.WHITE) -> void:
 	# V46.3: les structures reposent sur un sol localement tassé et le réseau de chemins
 	# contourne les volumes de collision. Cette ombre reste légère et sans collision.
 	if tex == CAMP_TEXTURE or tex == REFINERY_TEXTURE or tex == WRECK_TEXTURE or tex == LEVIATHAN_TEXTURE or tex == SALVAGE_RIG_TEXTURE or tex == IRON_PIT_TEXTURE:
@@ -147,16 +147,16 @@ func _add_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: fl
 	spr.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	spr.scale = Vector2(-scale_value if flip_h else scale_value, scale_value)
 	spr.z_index = int(pos.y + _decor_sort_offset(tex, scale_value))
-	spr.modulate = Color.WHITE
+	spr.modulate = tint
 	add_child(spr)
 
-func _add_blocking_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool, blockers: Array[Dictionary]) -> void:
+func _add_blocking_decor(node_name: String, tex: Texture2D, pos: Vector2, scale_value: float, flip_h: bool, blockers: Array[Dictionary], tint: Color = Color.WHITE) -> void:
 	# Reconstruction visuelle : un élément important ne peut plus être ajouté sans
 	# déclarer explicitement ses volumes de blocage dans le même appel.
 	if blockers.is_empty():
 		push_error("Landmark %s refusé : aucun volume de blocage." % node_name)
 		return
-	_add_decor(node_name, tex, pos, scale_value, flip_h)
+	_add_decor(node_name, tex, pos, scale_value, flip_h, tint)
 	for blocker: Dictionary in blockers:
 		var offset: Vector2 = blocker.get("offset", Vector2.ZERO)
 		var radius: Vector2 = blocker.get("radius", Vector2.ZERO)
@@ -178,28 +178,9 @@ func _add_landmark_shadow(node_name: String, pos: Vector2, scale_value: float) -
 	add_child(shadow)
 
 func _build_environment_blockers() -> void:
-	# Les seuls colliders déclarés ici correspondent au terrain lui-même
-	# (falaises/bordures visibles). Les objets ont leurs colliders dans _add_blocking_decor.
+	# Le fond reconstruit ne contient aucun obstacle gameplay.
+	# Tous les obstacles visibles sont des sprites modulaires ajoutés ensuite avec leurs colliders.
 	_blockers.clear()
-	# North-west camp : collisions désormais attachées directement au sprite.
-	# North-east refinery : collisions attachées au sprite.
-	# South wreck : collisions attachées au sprite.
-	# South-east outpost : collision attachée au sprite.
-	# Rock groups around the central lanes
-	# V47.0 — Canyon des Échos. Les falaises laissent un corridor central traversable.
-	for x: float in [3210.0, 3435.0, 3660.0, 3890.0, 4050.0]:
-		_add_ellipse(Vector2(x, 205.0), Vector2(165.0, 205.0))
-		_add_ellipse(Vector2(x, 1840.0), Vector2(170.0, 208.0))
-	# Pierres d'entrée et points d'intérêt du canyon.
-	# Cimetière d’Épaves — empreintes au sol recalées sur les pixels visibles.
-	# Les anciennes ellipses provenaient d'une échelle plus grande et créaient de
-	# larges murs invisibles autour des nouveaux décors.
-	_add_ellipse(Vector2(1250.0, 2260.0), Vector2(145.0, 74.0))
-	# Soft rocky rim from the background image so the player cannot walk on those visible edges.
-	_add_ellipse(Vector2(170.0, 180.0), Vector2(210.0, 105.0))
-	_add_ellipse(Vector2(2860.0, 210.0), Vector2(220.0, 112.0))
-	_add_ellipse(Vector2(235.0, 1885.0), Vector2(220.0, 100.0))
-	_add_ellipse(Vector2(2845.0, 1845.0), Vector2(220.0, 104.0))
 
 func _add_ellipse(center: Vector2, radius: Vector2) -> void:
 	_blockers.append({"type": "ellipse", "center": center, "radius": radius})
