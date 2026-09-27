@@ -1,0 +1,45 @@
+name: Visual Rebuild Terrain
+
+on:
+  push:
+    branches: ["visual-rebuild"]
+    paths:
+      - "tools/build_visual_terrain.py"
+      - ".github/workflows/visual-rebuild-terrain.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: visual-rebuild-terrain
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout visual rebuild
+        uses: actions/checkout@v4
+        with:
+          ref: visual-rebuild
+
+      - name: Install image tooling
+        run: python3 -m pip install --quiet pillow numpy opencv-python-headless
+
+      - name: Build native terrain
+        run: python3 tools/build_visual_terrain.py
+
+      - name: Commit generated terrain
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/map/desert_world_rebuild.webp
+          if git diff --cached --quiet; then
+            echo "Terrain already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Rebuild: generate native seamless desert terrain"
+          git push origin HEAD:visual-rebuild
