@@ -1,0 +1,45 @@
+name: Build V50.1 Terrain
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "tools/build_v50_1_terrain.py"
+      - ".github/workflows/build-v50-1-terrain.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-v50-1-terrain
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Build native-resolution terrain
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet pillow
+          python3 tools/build_v50_1_terrain.py
+          test -s assets/map/desert_world_v50_1.webp
+
+      - name: Commit terrain
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/map/desert_world_v50_1.webp
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "V50.1: build crisp modular terrain"
+          git push
